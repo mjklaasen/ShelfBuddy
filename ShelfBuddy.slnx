@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ShelfBuddy.AppHost/ShelfBuddy.AppHost.csproj" />
+    <Project Path="src/ShelfBuddy.Contracts/ShelfBuddy.Contracts.csproj" Id="34b0ee5c-f167-4791-9e52-b8eabec495a4" />
     <Project Path="src/ShelfBuddy.ServiceDefaults/ShelfBuddy.ServiceDefaults.csproj" />
     <Project Path="src/ShelfBuddy.SharedKernel/ShelfBuddy.SharedKernel.csproj" Id="7aeaa051-b0b7-4cd7-85b4-fc1ff480a149" />
   </Folder>
