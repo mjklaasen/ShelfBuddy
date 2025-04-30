@@ -1,6 +1,6 @@
 ﻿using ShelfBuddy.SharedKernel;
 
-namespace ShelfBuddy.Inventory.Domain;
+namespace ShelfBuddy.InventoryManagement.Domain;
 
 public class ProductCategory : Entity
 {

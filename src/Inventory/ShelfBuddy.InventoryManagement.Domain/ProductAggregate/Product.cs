@@ -1,6 +1,6 @@
 ﻿using ShelfBuddy.SharedKernel;
 
-namespace ShelfBuddy.Inventory.Domain;
+namespace ShelfBuddy.InventoryManagement.Domain;
 
 public class Product(ProductCategory category, Guid? id = null) : AggregateRoot(id ?? Guid.CreateVersion7())
 {
