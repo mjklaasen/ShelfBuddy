@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\ShelfBuddy.SharedKernel\ShelfBuddy.SharedKernel.csproj" />
+  </ItemGroup>
+
 </Project>
