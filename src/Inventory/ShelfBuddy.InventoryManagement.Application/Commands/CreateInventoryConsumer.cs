@@ -10,7 +10,7 @@ public class CreateInventoryConsumer(IInventoryRepository inventoryRepository) :
 
     public async Task Consume(ConsumeContext<CreateInventory> context)
     {
-        var inventory  = new Inventory();
+        var inventory  = new Inventory(context.Message.Name, context.Message.UserId);
         var result = await _inventoryRepository.CreateAsync(inventory);
         if (result.IsError)
         {
