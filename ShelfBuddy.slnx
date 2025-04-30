@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ShelfBuddy.AppHost/ShelfBuddy.AppHost.csproj" />
+    <Project Path="src/ShelfBuddy.ServiceDefaults/ShelfBuddy.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/src/Inventory/" Id="6646dc9b-45f7-597f-fd98-dc7f277572b1">
+    <Project Path="src/Inventory/ShelfBuddy.Inventory.Domain/ShelfBuddy.Inventory.Domain.csproj" Id="cd393b2b-2b81-4030-88b9-d669aa370943" />
+  </Folder>
+</Solution>
