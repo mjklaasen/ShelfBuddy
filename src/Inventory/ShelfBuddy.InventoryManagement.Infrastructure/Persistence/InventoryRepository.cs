@@ -20,9 +20,9 @@ public class InventoryRepository(InventoryDbContext dbContext) : IInventoryRepos
         return await _dbContext.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(Guid inventoryId)
+    public async Task DeleteAsync(Guid id)
     {
-        var inventory = await _dbContext.Inventories.FindAsync(inventoryId);
+        var inventory = await _dbContext.Inventories.FindAsync(id);
         if (inventory is null)
         {
             return;
@@ -31,14 +31,23 @@ public class InventoryRepository(InventoryDbContext dbContext) : IInventoryRepos
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<Inventory?> GetByIdAsync(Guid inventoryId)
+    public async Task<Inventory?> GetByIdAsync(Guid id)
     {
-        return await _dbContext.Inventories.FindAsync(inventoryId);
+        return await _dbContext.Inventories.FindAsync(id);
     }
 
-    public async Task<IEnumerable<Inventory>> ListAsync(int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<Inventory>> ListAsync(int page = 1, int pageSize = 10, Guid? userId = null)
     {
+        if (userId is null)
+        {
+            return await _dbContext.Inventories
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
         return await _dbContext.Inventories
+            .Where(inventory => inventory.UserId == userId)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

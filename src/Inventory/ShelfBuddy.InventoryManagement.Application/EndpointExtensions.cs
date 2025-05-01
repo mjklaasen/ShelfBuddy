@@ -53,13 +53,14 @@ public static class EndpointExtensions
                 })
             .WithName("UpdateInventory");
 
-        group.MapGet("/", async ([FromServices] IInventoryRepository inventoryRepository,
-                [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
-            {
-                var inventories = await inventoryRepository.ListAsync();
-                return Results.Ok(inventories.Select(x =>
-                    new InventoryDto(x.Id, x.Name, x.UserId, x.Products.ToDictionary())));
-            })
+        group.MapGet("/",
+                async ([FromServices] IInventoryRepository inventoryRepository, [FromQuery] int page = 1,
+                    [FromQuery] int pageSize = 10, [FromQuery] Guid? userId = null) =>
+                {
+                    var inventories = await inventoryRepository.ListAsync(page, pageSize, userId);
+                    return Results.Ok(inventories.Select(x =>
+                        new InventoryDto(x.Id, x.Name, x.UserId, x.Products.ToDictionary())));
+                })
             .WithName("ListInventories");
 
         group.MapGet("/{id:guid}", async ([FromServices] IInventoryRepository inventoryRepository, Guid id) =>

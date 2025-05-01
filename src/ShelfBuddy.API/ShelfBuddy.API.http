@@ -10,13 +10,18 @@ Accept: application/json
 Content-Type: application/json
 
 {
-  "name": "test",
-  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  "name": "test 3",
+  "userId": "F6557C1E-53B6-4306-8611-D8DE40DBADE9"
 }
 
 ###
 
 GET {{ShelfBuddy.API_HostAddress}}/inventory/
+Accept: application/json
+
+###
+
+GET {{ShelfBuddy.API_HostAddress}}/inventory?userId=F6557C1E-53B6-4306-8611-D8DE40DBADE9
 Accept: application/json
 
 ###
