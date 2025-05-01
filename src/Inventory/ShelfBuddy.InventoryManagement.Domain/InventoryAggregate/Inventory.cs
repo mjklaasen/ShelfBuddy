@@ -3,11 +3,14 @@ using ShelfBuddy.SharedKernel;
 
 namespace ShelfBuddy.InventoryManagement.Domain;
 
-public class Inventory(string name, Guid userId, Guid? id = null) : AggregateRoot(id ?? Guid.CreateVersion7())
+public class Inventory(string name, Guid userId, Guid id) : AggregateRoot(id)
 {
     private readonly Dictionary<Guid, int> _products = [];
     public string Name { get; set; } = name;
     public Guid UserId { get; } = userId;
+    public IReadOnlyDictionary<Guid, int> Products => _products;
+
+    public Inventory(string name, Guid userId) : this(name, userId, Guid.CreateVersion7()) { }
 
     public void AddProduct(Guid productId, int quantity)
     {

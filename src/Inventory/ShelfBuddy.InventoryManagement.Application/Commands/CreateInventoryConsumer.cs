@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using ErrorOr;
+using MassTransit;
 using ShelfBuddy.Contracts;
 using ShelfBuddy.InventoryManagement.Domain;
 
@@ -11,10 +12,12 @@ public class CreateInventoryConsumer(IInventoryRepository inventoryRepository) :
     public async Task Consume(ConsumeContext<CreateInventory> context)
     {
         var inventory  = new Inventory(context.Message.Name, context.Message.UserId);
-        var result = await _inventoryRepository.CreateAsync(inventory);
-        if (result.IsError)
+        var created = await _inventoryRepository.CreateAsync(inventory);
+        if (created == 0)
         {
-            await context.RespondAsync(new ErrorResponse(result.Errors));
+            await context.RespondAsync(new ErrorResponse([
+                Error.Failure(code: "Inventory.Application.NotCreated", description: "Nothing was created.")
+            ]));
             return;
         }
 

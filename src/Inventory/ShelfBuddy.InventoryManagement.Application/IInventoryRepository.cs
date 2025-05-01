@@ -5,8 +5,9 @@ namespace ShelfBuddy.InventoryManagement.Application;
 
 public interface IInventoryRepository
 {
-    Task<ErrorOr<Created>> CreateAsync(Inventory inventory);
-    Task<ErrorOr<Updated>> UpdateAsync(Inventory inventory);
-    Task<ErrorOr<Deleted>> DeleteAsync(Guid inventoryId);
-    Task<ErrorOr<Inventory>> GetByIdAsync(Guid inventoryId);
+    Task<int> CreateAsync(Inventory inventory);
+    Task<int> UpdateAsync(Inventory inventory);
+    Task DeleteAsync(Guid inventoryId);
+    Task<Inventory?> GetByIdAsync(Guid inventoryId);
+    Task<IEnumerable<Inventory>> ListAsync(int page = 1, int pageSize = 10);
 }
