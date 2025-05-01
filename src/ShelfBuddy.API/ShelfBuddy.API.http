@@ -1,0 +1,27 @@
+@ShelfBuddy.API_HostAddress = http://localhost:5240
+
+GET {{ShelfBuddy.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+POST {{ShelfBuddy.API_HostAddress}}/inventory/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "test",
+  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}
+
+###
+
+GET {{ShelfBuddy.API_HostAddress}}/inventory/
+Accept: application/json
+
+###
+
+GET {{ShelfBuddy.API_HostAddress}}/inventory/01968b6f-8bed-7d4e-aa7d-1d4e8c4d4e29
+Accept: application/json
+
+###
