@@ -49,6 +49,7 @@ public class ProductRepository(InventoryDbContext dbContext) : IProductRepositor
     public async Task<IEnumerable<Product>> ListAsync(int page = 1, int pageSize = 10)
     {
         return await _dbContext.Products
+            .Include(x => x.ProductCategory)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

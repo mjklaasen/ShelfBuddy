@@ -112,6 +112,15 @@ public static class EndpointExtensions
             })
             .WithName("GetProduct");
 
+        group.MapGet("/", async ([FromServices] IProductRepository productRepository,
+                [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+            {
+                var products = await productRepository.ListAsync();
+                return Results.Ok(products.Select(x =>
+                    new ProductDto(x.Id, x.Name, new ProductCategoryDto(x.ProductCategory.Id, x.ProductCategory.Name))));
+            })
+            .WithName("ListProducts");
+
         group.MapPut("/{id:guid}",
             async ([FromBody] ProductDto message, [FromServices] IRequestClient<UpdateProduct> client, Guid id) =>
             {

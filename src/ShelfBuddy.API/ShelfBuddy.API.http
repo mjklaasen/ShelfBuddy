@@ -72,3 +72,8 @@ Content-Type: application/json
 }
 
 ###
+
+GET {{ShelfBuddy.API_HostAddress}}/product
+Accept: application/json
+
+###
