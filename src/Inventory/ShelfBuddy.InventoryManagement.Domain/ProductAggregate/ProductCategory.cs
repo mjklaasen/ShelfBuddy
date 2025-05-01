@@ -4,8 +4,12 @@ namespace ShelfBuddy.InventoryManagement.Domain;
 
 public class ProductCategory : Entity
 {
-    internal ProductCategory(Guid id) : base(id) { }
-    internal ProductCategory() : this(Guid.CreateVersion7()) { }
+    internal ProductCategory(string name, Guid id) : base(id)
+    {
+        Name = name;
+    }
 
-    public string Name { get; internal set; } = string.Empty;
+    internal ProductCategory(string name) : this(name, Guid.CreateVersion7()) { }
+
+    public string Name { get; internal set; }
 }

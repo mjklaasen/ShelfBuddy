@@ -2,12 +2,22 @@
 
 namespace ShelfBuddy.InventoryManagement.Domain;
 
-public class Product(string name, ProductCategory category, Guid id) : AggregateRoot(id)
+public class Product : AggregateRoot
 {
-    public Product(string name, ProductCategory category) : this(name, category, Guid.CreateVersion7()) { }
+    public string Name { get; set; }
+    public ProductCategory ProductCategory { get; set; }
 
-    public string Name { get; set; } = name;
-    public ProductCategory Category { get; set; } = category;
+    public Product(string name, ProductCategory productCategory, Guid id) : base(id)
+    {
+        Name = name;
+        ProductCategory = productCategory;
+    }
 
-    private Product() : this("", new ProductCategory()) { }
+    public Product(string name, ProductCategory productCategory) : this(name, productCategory, Guid.CreateVersion7()) { }
+    public Product(string name, string categoryName) : this(name, new ProductCategory(categoryName), Guid.CreateVersion7()) { }
+
+    private Product(string name)
+    {
+        Name = name;
+    }
 }

@@ -32,34 +32,3 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
         builder.Ignore(inventory => inventory.Products);
     }
 }
-
-
-public class ProductConfiguration : IEntityTypeConfiguration<Product>
-{
-    public void Configure(EntityTypeBuilder<Product> builder)
-    {
-        builder.HasKey(product => product.Id);
-        builder.Property(product => product.Id).ValueGeneratedNever();
-
-        builder.Property(product => product.Name)
-            .IsRequired()
-            .HasMaxLength(100);
-
-        builder.HasOne(product => product.Category)
-            .WithMany()
-            .OnDelete(DeleteBehavior.Cascade);
-    }
-}
-
-public class ProductCategoryConfiguration : IEntityTypeConfiguration<ProductCategory>
-{
-    public void Configure(EntityTypeBuilder<ProductCategory> builder)
-    {
-        builder.HasKey(productCategory => productCategory.Id);
-        builder.Property(productCategory => productCategory.Id).ValueGeneratedNever();
-
-        builder.Property(productCategory => productCategory.Name)
-            .IsRequired()
-            .HasMaxLength(100);
-    }
-}

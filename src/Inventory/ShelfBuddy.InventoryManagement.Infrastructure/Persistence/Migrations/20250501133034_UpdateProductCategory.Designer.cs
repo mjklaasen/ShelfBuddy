@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShelfBuddy.InventoryManagement.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using ShelfBuddy.InventoryManagement.Infrastructure.Persistence;
 namespace ShelfBuddy.InventoryManagement.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(InventoryDbContext))]
-    partial class InventoryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250501133034_UpdateProductCategory")]
+    partial class UpdateProductCategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,17 +55,17 @@ namespace ShelfBuddy.InventoryManagement.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("ProductCategoryId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductCategoryId");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
                 });
@@ -84,13 +87,13 @@ namespace ShelfBuddy.InventoryManagement.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("ShelfBuddy.InventoryManagement.Domain.Product", b =>
                 {
-                    b.HasOne("ShelfBuddy.InventoryManagement.Domain.ProductCategory", "ProductCategory")
+                    b.HasOne("ShelfBuddy.InventoryManagement.Domain.ProductCategory", "Category")
                         .WithMany()
-                        .HasForeignKey("ProductCategoryId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductCategory");
+                    b.Navigation("Category");
                 });
 #pragma warning restore 612, 618
         }
