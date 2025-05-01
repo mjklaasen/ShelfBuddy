@@ -17,7 +17,10 @@ public static class DependencyInjection
 
     private static void AddInventoryManagementInfrastructureServices(this IServiceCollection services)
     {
-        services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services
+            .AddScoped<IInventoryRepository, InventoryRepository>()
+            .AddScoped<IProductCategoryRepository, ProductCategoryRepository>()
+            .AddScoped<IProductRepository, ProductRepository>();
     }
 
     private static IHostApplicationBuilder AddPersistence(this IHostApplicationBuilder builder)

@@ -1,5 +1,4 @@
-﻿using ErrorOr;
-using ShelfBuddy.SharedKernel;
+﻿using ShelfBuddy.SharedKernel;
 
 namespace ShelfBuddy.InventoryManagement.Domain;
 
@@ -7,7 +6,7 @@ public class Inventory(string name, Guid userId, Guid id) : AggregateRoot(id)
 {
     private readonly Dictionary<Guid, int> _products = [];
     public string Name { get; set; } = name;
-    public Guid UserId { get; } = userId;
+    public Guid UserId { get; set; } = userId;
     public IReadOnlyDictionary<Guid, int> Products => _products;
 
     public Inventory(string name, Guid userId) : this(name, userId, Guid.CreateVersion7()) { }
@@ -20,12 +19,11 @@ public class Inventory(string name, Guid userId, Guid id) : AggregateRoot(id)
         }
     }
 
-    public ErrorOr<Success> RemoveProduct(Guid productId, int quantity)
+    public void RemoveProduct(Guid productId, int quantity)
     {
         if (!_products.TryGetValue(productId, out var currentQuantity))
         {
-            return Error.NotFound(code: "Inventory.ProductNotFound",
-                description: "This inventory does not contain this product.");
+            return;
         }
 
         _products[productId] -= quantity;
@@ -34,8 +32,6 @@ public class Inventory(string name, Guid userId, Guid id) : AggregateRoot(id)
         {
             _products.Remove(productId);
         }
-        
-        return Result.Success;
     }
 
     public int GetProductQuantity(Guid productId)

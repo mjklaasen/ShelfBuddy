@@ -25,3 +25,32 @@ GET {{ShelfBuddy.API_HostAddress}}/inventory/01968b6f-8bed-7d4e-aa7d-1d4e8c4d4e2
 Accept: application/json
 
 ###
+
+PUT {{ShelfBuddy.API_HostAddress}}/inventory/01968b6f-8bed-7d4e-aa7d-1d4e8c4d4e29
+Accept: application/json
+Content-Type: application/json
+{
+  "name": "test",
+  "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "products": {
+    "320FEA59-A41C-46B8-AA88-048CAF2E2855": 14
+  }
+}
+
+###
+
+POST {{ShelfBuddy.API_HostAddress}}/product/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "test product 4",
+  "productCategory": "Test category 2"
+}
+
+###
+
+GET {{ShelfBuddy.API_HostAddress}}/product/01968c24-01f3-7a8e-9cd1-d75b042d9654
+Accept: application/json
+
+###

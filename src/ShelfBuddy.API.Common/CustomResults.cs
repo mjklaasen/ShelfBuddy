@@ -27,10 +27,12 @@ public static class CustomResults
             ErrorType.Conflict => StatusCodes.Status409Conflict,
             ErrorType.Validation => StatusCodes.Status400BadRequest,
             ErrorType.NotFound => StatusCodes.Status404NotFound,
+            ErrorType.Forbidden => StatusCodes.Status403Forbidden,
+            ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError,
         };
 
-        return Results.Problem(statusCode: statusCode, title: error.Description);
+        return Results.Problem(statusCode: statusCode, title: error.Code, detail: error.Description);
     }
 
     private static IResult ValidationProblem(List<Error> errors)
