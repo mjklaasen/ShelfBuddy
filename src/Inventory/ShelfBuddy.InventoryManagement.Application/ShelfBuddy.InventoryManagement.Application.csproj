@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="8.4.0" />
+    <PackageReference Include="MassTransit" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\ShelfBuddy.API.Common\ShelfBuddy.API.Common.csproj" />
