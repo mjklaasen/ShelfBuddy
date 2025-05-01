@@ -26,16 +26,22 @@ Accept: application/json
 
 ###
 
-PUT {{ShelfBuddy.API_HostAddress}}/inventory/01968b6f-8bed-7d4e-aa7d-1d4e8c4d4e29
+PUT {{ShelfBuddy.API_HostAddress}}/inventory/01968b69-8845-75de-8fe6-6f6c32813c8f
 Accept: application/json
 Content-Type: application/json
 {
   "name": "test",
   "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "products": {
-    "320FEA59-A41C-46B8-AA88-048CAF2E2855": 14
+    "01968c24-01f3-7a8e-9cd1-d75b042d9654": 14
   }
 }
+
+###
+
+
+DELETE {{ShelfBuddy.API_HostAddress}}/inventory/01968b7c-3158-7d12-bd21-3cd61a0a9035
+Accept: application/json
 
 ###
 
