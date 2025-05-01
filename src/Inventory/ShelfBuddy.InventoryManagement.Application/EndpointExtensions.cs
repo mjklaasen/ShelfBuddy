@@ -112,6 +112,20 @@ public static class EndpointExtensions
             })
             .WithName("GetProduct");
 
+        group.MapPut("/{id:guid}",
+            async ([FromBody] ProductDto message, [FromServices] IRequestClient<UpdateProduct> client, Guid id) =>
+            {
+                var response =
+                    await client.GetResponse<ProductUpdated, ErrorResponse>(new UpdateProduct(id, message.Name,
+                        message.ProductCategory.Name));
+                return response switch
+                {
+                    {Message: ProductUpdated updated} => Results.Ok(updated.Product),
+                    {Message: ErrorResponse errorResponse} => CustomResults.Problem(errorResponse.Errors),
+                    _ => Results.Problem("An unknown error occurred.")
+                };
+            }).WithName("UpdateProduct");
+
         return app;
     }
 }

@@ -5,7 +5,7 @@ namespace ShelfBuddy.InventoryManagement.Domain;
 public class Product : AggregateRoot
 {
     public string Name { get; set; }
-    public ProductCategory ProductCategory { get; set; }
+    public ProductCategory ProductCategory { get; private set; }
 
     public Product(string name, ProductCategory productCategory, Guid id) : base(id)
     {
@@ -19,5 +19,15 @@ public class Product : AggregateRoot
     private Product(string name)
     {
         Name = name;
+    }
+
+    public void UpdateProductCategory(ProductCategory productCategory)
+    {
+        ProductCategory = productCategory;
+    }
+
+    public void UpdateProductCategory(string productCategory)
+    {
+        ProductCategory = new ProductCategory(productCategory);
     }
 }

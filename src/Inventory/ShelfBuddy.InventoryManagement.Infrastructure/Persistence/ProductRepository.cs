@@ -18,7 +18,7 @@ public class ProductRepository(InventoryDbContext dbContext) : IProductRepositor
             productCategory = product.ProductCategory;
         }
 
-        product.ProductCategory = productCategory;
+        product.UpdateProductCategory(productCategory);
         await _dbContext.Products.AddAsync(product);
         return await _dbContext.SaveChangesAsync();
     }
