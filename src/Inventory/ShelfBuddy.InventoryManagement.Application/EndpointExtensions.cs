@@ -135,6 +135,12 @@ public static class EndpointExtensions
                 };
             }).WithName("UpdateProduct");
 
+        group.MapDelete("/{id:guid}", async ([FromServices] IProductRepository productRepository, Guid id) =>
+        {
+            await productRepository.DeleteAsync(id);
+            return Results.Ok();
+        });
+
         return app;
     }
 }
