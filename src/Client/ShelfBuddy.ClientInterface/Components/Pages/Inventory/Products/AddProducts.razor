@@ -1,0 +1,624 @@
+﻿@page "/inventory/{InventoryId:guid}/products/add"
+@using System.ComponentModel.DataAnnotations
+@using ShelfBuddy.ClientInterface.Components.Shared
+@using ShelfBuddy.Contracts
+@inject IHttpClientFactory HttpClientFactory
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Add Products to Inventory</PageTitle>
+
+<div class="add-products-container">
+    @if (_isLoading)
+    {
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading...</p>
+            </div>
+    }
+    else if (_error is not null)
+    {
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error</h4>
+                <p>@_error</p>
+                <div class="mt-3">
+                    <button class="btn btn-primary me-2" @onclick="LoadDataAsync">Try Again</button>
+                    <button class="btn btn-outline-secondary" @onclick="NavigateBack">Back to Inventory</button>
+                </div>
+            </div>
+    }
+    else
+    {
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+                <h1 class="mb-2 mb-md-0">Add Products to @(_inventoryName)</h1>
+                <button class="btn btn-outline-secondary btn-sm" @onclick="NavigateBack">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+            </div>
+
+            <div class="row row-cols-mobile-1">
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Add Existing Products</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <SearchBar OnClick="@SearchProductsAsync" />
+                            </div>
+
+                        @if (_isSearching)
+                        {
+                            <div class="text-center py-3">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Searching...</span>
+                                </div>
+                                <span class="ms-2">Searching products...</span>
+                            </div>
+                        }
+                        else if (_searchPerformed && !_searchResults.Any())
+                        {
+                            <div class="alert alert-info" role="alert">
+                                No products found matching your search.
+                                <button class="btn btn-sm btn-outline-primary ms-2" @onclick="ShowNewProductForm">
+                                    Create New Product
+                                </button>
+                            </div>
+                        }
+                        else @if (_searchResults.Any())
+                        {
+                            <div class="product-list">
+                                @foreach (var product in _searchResults)
+                                {
+                                    @if (product.Id.HasValue)
+                                    {
+                                        <div class="product-item">
+                                            <div class="product-name" @onclick="() => ShowProductDetails(product)">
+                                                @product.Name
+                                            </div>
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowQuantityPopup(product)">
+                                                <i class="bi bi-plus-circle"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Create New Product</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (_showNewProductForm)
+                        {
+                            <EditForm Model="@_newProductModel" OnValidSubmit="CreateAndAddProductAsync">
+                                <DataAnnotationsValidator/>
+                                <ValidationSummary/>
+
+                                <div class="mb-3">
+                                    <label for="productName" class="form-label">Product Name</label>
+                                    <InputText id="productName" @bind-Value="_newProductModel.Name" class="form-control"/>
+                                    <ValidationMessage For="@(() => _newProductModel.Name)"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="productCategory" class="form-label">Category</label>
+                                    <InputText id="productCategory" @bind-Value="_newProductModel.CategoryName" class="form-control"/>
+                                    <ValidationMessage For="@(() => _newProductModel.CategoryName)"/>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">Quantity</label>
+                                    <InputNumber id="quantity" @bind-Value="_newProductModel.Quantity" class="form-control" min="1"/>
+                                    <ValidationMessage For="@(() => _newProductModel.Quantity)"/>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-outline-secondary me-2" @onclick="HideNewProductForm">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="btn btn-success" disabled="@_isCreatingProduct">
+                                        @if (_isCreatingProduct)
+                                        {
+                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <span class="ms-2">Creating...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Create & Add</span>
+                                        }
+                                    </button>
+                                </div>
+                            </EditForm>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <i class="bi bi-box-seam text-muted" style="font-size: 3rem;"></i>
+                                <p class="mt-3">Need a product that doesn't exist yet?</p>
+                                <button class="btn btn-primary" @onclick="ShowNewProductForm">
+                                    <i class="bi bi-plus-circle"></i> Create New Product
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recently Added Products</h5>
+            </div>
+            <div class="card-body">
+                @if (!_addedProducts.Any())
+                {
+                    <div class="text-center py-3">
+                        <p class="text-muted">No products have been added yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive-sm">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th style="width: 60%">Product</th>
+                                <th style="width: 20%">Qty</th>
+                                <th style="width: 20%">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var (productId, quantity) in _addedProducts.OrderByDescending(p => p.Value))
+                            {
+                                var product = _allProducts.FirstOrDefault(p => p.Id.HasValue && p.Id.Value == productId);
+                                if (product is not null)
+                                {
+                                    <tr>
+                                        <td>@product.Name</td>
+                                        <td>@quantity</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => RemoveAddedProductAsync(productId)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            <div class="card-footer text-end">
+                <button class="btn btn-primary" @onclick="NavigateBack" disabled="@(!_addedProducts.Any())">
+                    <i class="bi bi-check-circle"></i> Done
+                </button>
+            </div>
+        </div>
+    }
+    <Modal @ref="_quantityModal" ConfirmText="Add" OnConfirm="ConfirmAddProduct" ShowCancelButton="true">
+        @if (_selectedProduct != null)
+        {
+            <div>
+                <h6>@_selectedProduct.Name</h6>
+                <div class="mb-3">
+                    <label for="quantityInput" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="quantityInput" min="1" @bind="_selectedQuantity" />
+                </div>
+            </div>
+        }
+    </Modal>
+
+    <Modal @ref="_detailsModal" ShowFooter="false">
+        @if (_selectedProduct != null)
+        {
+            <div>
+                <h5 class="mb-3">@_selectedProduct.Name</h5>
+                <div class="mb-2">
+                    <strong>Category:</strong> @_selectedProduct.ProductCategory.Name
+                </div>
+            </div>
+        }
+    </Modal>
+
+</div>
+    
+
+@code {
+    [Parameter]
+    public Guid InventoryId { get; set; }
+
+    private string? _inventoryName;
+    private List<ProductDto> _allProducts = [];
+    private List<ProductDto> _searchResults = [];
+    private readonly Dictionary<Guid, int> _productQuantities = new();
+    private Dictionary<Guid, int> _addedProducts = new();
+    private bool _isLoading = true;
+    private bool _isSearching;
+    private bool _searchPerformed;
+    private bool _showNewProductForm;
+    private bool _isCreatingProduct;
+    private string? _error;
+    private UserInfo? _currentUser;
+    private readonly NewProductModel _newProductModel = new();
+    private Modal _quantityModal = null!;
+    private Modal _detailsModal = null!;
+    private ProductDto? _selectedProduct;
+    private int _selectedQuantity = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check authentication
+        var isAuthenticated = await UserService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        // Get current user
+        _currentUser = await UserService.GetCurrentUserAsync();
+        if (_currentUser is null)
+        {
+            _error = "Unable to retrieve user information.";
+            _isLoading = false;
+            return;
+        }
+
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _isLoading = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // Load inventory details
+            var inventoryResponse = await client.GetAsync(new Uri($"/inventory/{InventoryId}", UriKind.Relative));
+            if (!inventoryResponse.IsSuccessStatusCode)
+            {
+                if (inventoryResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _error = "Inventory not found.";
+                }
+                else
+                {
+                    _error = $"Failed to load inventory: {inventoryResponse.ReasonPhrase}";
+                }
+                _isLoading = false;
+                return;
+            }
+
+            var inventory = await inventoryResponse.Content.ReadFromJsonAsync<InventoryDto>();
+            if (inventory is null)
+            {
+                _error = "Failed to parse inventory data.";
+                _isLoading = false;
+                return;
+            }
+
+            // Verify if the inventory belongs to the current user
+            if (inventory.UserId != _currentUser?.Id)
+            {
+                _error = "You do not have permission to modify this inventory.";
+                _isLoading = false;
+                return;
+            }
+
+            _inventoryName = inventory.Name;
+            _addedProducts = new Dictionary<Guid, int>(inventory.Products);
+
+            // Load all products for search functionality
+            var productsResponse = await client.GetAsync(new Uri("/product", UriKind.Relative));
+            if (productsResponse.IsSuccessStatusCode)
+            {
+                var products = await productsResponse.Content.ReadFromJsonAsync<List<ProductDto>>();
+                if (products is not null)
+                {
+                    _allProducts = products;
+                    
+                    // Initialize quantities dictionary, checking for null IDs
+                    foreach (var product in _allProducts.Where(p => p.Id.HasValue))
+                    {
+                        _productQuantities[product.Id!.Value] = 1;
+                    }
+                }
+            }
+            else
+            {
+                _error = $"Warning: Failed to load product list: {productsResponse.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SearchProductsAsync(string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            _searchResults = [];
+            return;
+        }
+
+        _isSearching = true;
+        _searchPerformed = true;
+        StateHasChanged();
+
+        try
+        {
+            // Simulate API call - in a real app, you'd call the API with search parameters
+            await Task.Delay(300); // Simulated network delay
+
+            _searchResults = _allProducts
+                .Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || 
+                           p.ProductCategory.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error searching products: {ex.Message}";
+        }
+        finally
+        {
+            _isSearching = false;
+            StateHasChanged();
+        }
+    }
+
+    
+
+    private async Task AddProductToInventoryAsync(Guid productId, int quantity)
+    {
+        if (quantity <= 0) return;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // Get the current inventory
+            var response = await client.GetAsync(new Uri($"/inventory/{InventoryId}", UriKind.Relative));
+            if (!response.IsSuccessStatusCode)
+            {
+                _error = $"Failed to get inventory: {response.ReasonPhrase}";
+                return;
+            }
+
+            var inventory = await response.Content.ReadFromJsonAsync<InventoryDto>();
+            if (inventory is null)
+            {
+                _error = "Failed to parse inventory data.";
+                return;
+            }
+
+            // Create updated copy of the inventory
+            var updatedProducts = new Dictionary<Guid, int>(inventory.Products);
+            
+            // Add or update the product quantity
+            if (updatedProducts.TryGetValue(productId, out var currentQuantity))
+            {
+                updatedProducts[productId] = currentQuantity + quantity;
+            }
+            else
+            {
+                updatedProducts[productId] = quantity;
+            }
+
+            var updatedInventory = inventory with { Products = updatedProducts };
+
+            // Update the inventory
+            var updateResponse = await client.PutAsJsonAsync(
+                new Uri($"/inventory/{InventoryId}", UriKind.Relative), 
+                updatedInventory);
+
+            if (updateResponse.IsSuccessStatusCode)
+            {
+                _addedProducts = updatedProducts;
+                // Reset quantity input for this product
+                _productQuantities[productId] = 1;
+            }
+            else
+            {
+                _error = $"Failed to update inventory: {updateResponse.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task RemoveAddedProductAsync(Guid productId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // Get the current inventory
+            var response = await client.GetAsync(new Uri($"/inventory/{InventoryId}", UriKind.Relative));
+            if (!response.IsSuccessStatusCode)
+            {
+                _error = $"Failed to get inventory: {response.ReasonPhrase}";
+                return;
+            }
+
+            var inventory = await response.Content.ReadFromJsonAsync<InventoryDto>();
+            if (inventory is null)
+            {
+                _error = "Failed to parse inventory data.";
+                return;
+            }
+
+            // Create updated copy of the inventory
+            var updatedProducts = new Dictionary<Guid, int>(inventory.Products);
+            
+            // Remove the product
+            updatedProducts.Remove(productId);
+
+            var updatedInventory = inventory with { Products = updatedProducts };
+
+            // Update the inventory
+            var updateResponse = await client.PutAsJsonAsync(
+                new Uri($"/inventory/{InventoryId}", UriKind.Relative), 
+                updatedInventory);
+
+            if (updateResponse.IsSuccessStatusCode)
+            {
+                _addedProducts = updatedProducts;
+            }
+            else
+            {
+                _error = $"Failed to update inventory: {updateResponse.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private void ShowNewProductForm()
+    {
+        _showNewProductForm = true;
+    }
+
+    private void HideNewProductForm()
+    {
+        _showNewProductForm = false;
+        _newProductModel.Name = string.Empty;
+        _newProductModel.CategoryName = string.Empty;
+        _newProductModel.Quantity = 1;
+    }
+
+    private async Task CreateAndAddProductAsync()
+    {
+        _isCreatingProduct = true;
+        StateHasChanged();
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // Create the new product
+            var createRequest = new 
+            {
+                _newProductModel.Name,
+                ProductCategory = _newProductModel.CategoryName
+            };
+
+            var response = await client.PostAsJsonAsync(new Uri("/product", UriKind.Relative), createRequest);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var createdProduct = await response.Content.ReadFromJsonAsync<ProductDto>();
+                if (createdProduct is not null && createdProduct.Id.HasValue)
+                {
+                    // Add the new product to all products list
+                    _allProducts.Add(createdProduct);
+                    _productQuantities[createdProduct.Id.Value] = 1;
+
+                    // Add the product to the inventory
+                    await AddProductToInventoryAsync(createdProduct.Id.Value, _newProductModel.Quantity);
+
+                    // Clear the form and hide it
+                    HideNewProductForm();
+                }
+                else
+                {
+                    _error = "Failed to parse created product data or product ID is missing.";
+                }
+            }
+            else
+            {
+                _error = $"Failed to create product: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _isCreatingProduct = false;
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo($"/inventory/{InventoryId}");
+    }
+
+    private void ShowProductDetails(ProductDto product)
+    {
+        _selectedProduct = product;
+        _detailsModal.Show();
+    }
+
+    private void ShowQuantityPopup(ProductDto product)
+    {
+        _selectedProduct = product;
+        if (product.Id.HasValue)
+        {
+            _selectedQuantity = _productQuantities[product.Id.Value];
+        }
+        else
+        {
+            _selectedQuantity = 1;
+        }
+        _quantityModal.Show();
+    }
+
+    private async Task ConfirmAddProduct()
+    {
+        if (_selectedProduct?.Id.HasValue == true)
+        {
+            await AddProductToInventoryAsync(_selectedProduct.Id.Value, _selectedQuantity);
+        }
+    }
+
+    public class NewProductModel
+    {
+        [Required(ErrorMessage = "Product name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        [MinLength(2, ErrorMessage = "Name must be at least 2 characters")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Category is required")]
+        [StringLength(50, ErrorMessage = "Category name cannot exceed 50 characters")]
+        public string CategoryName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Quantity is required")]
+        [Range(1, 9999, ErrorMessage = "Quantity must be between 1 and 9999")]
+        public int Quantity { get; set; } = 1;
+    }
+}

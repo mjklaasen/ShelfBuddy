@@ -1,0 +1,27 @@
+﻿<div class="input-group search-group">
+    <input type="text" class="form-control search-input" placeholder="Search products..."
+    @bind-value="_searchTerm" @bind-value:event="oninput" @onkeyup="HandleKeyPressAsync"
+    @onfocus="() => _searchInputFocused = true" @onblur="() => _searchInputFocused = false" />
+    <button class="btn btn-outline-primary search-button @(_searchInputFocused ? "focused" : "")"
+    type="button" @onclick="async () => await OnClick.InvokeAsync(_searchTerm)">
+        <i class="bi bi-search"></i>
+    </button>
+</div>
+
+@code
+{
+    private string _searchTerm = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> OnClick { get; set; }
+
+    private bool _searchInputFocused;
+
+    private async Task HandleKeyPressAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await OnClick.InvokeAsync(_searchTerm);
+        }
+    }
+}

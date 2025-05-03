@@ -1,0 +1,53 @@
+﻿.inventory-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    background-color: var(--card-bg) !important;
+    color: var(--text) !important;
+    border-color: var(--border);
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    margin-top: 0.25rem;
+}
+
+:deep(.validation-message) {
+    color: var(--danger);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+:deep(.input-validation-error) {
+    border-color: var(--danger);
+}
+
+:deep(label) {
+    color: var(--text);
+}
+
+:deep(input), :deep(select), :deep(textarea) {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border);
+}
+
+:deep(input:focus), :deep(select:focus), :deep(textarea:focus) {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+@media (max-width: 576px) {
+    .inventory-form-container {
+        padding: 1rem;
+    }
+}

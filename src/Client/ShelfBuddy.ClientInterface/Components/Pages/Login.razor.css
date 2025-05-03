@@ -1,0 +1,142 @@
+﻿.login-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1.5rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+}
+
+.login-header h1 {
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: var(--text-light);
+}
+
+.login-form {
+    width: 100%;
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+    .input-with-icon i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+    }
+
+    .input-with-icon input {
+        padding-left: 2.75rem;
+        background-color: var(--input-bg);
+        color: var(--input-text);
+        border-color: var(--border);
+    }
+
+        .input-with-icon input:focus {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border-color: var(--primary);
+        }
+
+        .input-with-icon input::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+.form-control {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border);
+}
+
+.btn-block {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+}
+
+.demo-users {
+    margin-top: 2rem;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border);
+}
+
+    .demo-users h5 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-light);
+    }
+
+.demo-user-badge {
+    display: inline-block;
+    background-color: var(--primary-light);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    margin: 0.25rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+    .demo-user-badge:active {
+        transform: scale(0.95);
+    }
+
+.demo-users small {
+    display: block;
+    margin-top: 0.75rem;
+    color: var(--text-light);
+    font-size: 0.8rem;
+}

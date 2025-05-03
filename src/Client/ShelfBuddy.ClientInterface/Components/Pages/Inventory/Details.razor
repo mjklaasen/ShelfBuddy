@@ -1,0 +1,361 @@
+﻿@page "/inventory/{Id:guid}"
+@using ShelfBuddy.Contracts
+@inject IHttpClientFactory HttpClientFactory
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Inventory Details</PageTitle>
+
+<div class="inventory-details-container">
+    @if (_isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading inventory details...</p>
+        </div>
+    }
+    else if (_error is not null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Error</h4>
+            <p>@_error</p>
+            <div class="mt-3">
+                <button class="btn btn-primary me-2" @onclick="LoadInventoryAsync">Try Again</button>
+                <button class="btn btn-outline-secondary" @onclick="NavigateToInventories">Back to List</button>
+            </div>
+        </div>
+    }
+    else if (_inventory is not null)
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>@_inventory.Name</h1>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" @onclick="NavigateToInventories">
+                    <i class="bi bi-arrow-left"></i> Back to Inventories
+                </button>
+                <button class="btn btn-primary" @onclick="() => EditInventory(_inventory.Id)">
+                    <i class="bi bi-pencil"></i> Edit Inventory
+                </button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Inventory Details</h5>
+                <span class="badge bg-primary">@_inventory.Products.Count Products</span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Name:</div>
+                    <div class="col-md-9">@_inventory.Name</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3 fw-bold">Total Items:</div>
+                    <div class="col-md-9">@_inventory.Products.Sum(p => p.Value)</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 fw-bold">Created By:</div>
+                    <div class="col-md-9">@(_currentUser?.Username ?? "Unknown User")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Products</h5>
+                <button class="btn btn-sm btn-success" @onclick="() => NavigateToAddProducts(_inventory.Id)">
+                    <i class="bi bi-plus-circle"></i> Add Products
+                </button>
+            </div>
+            <div class="card-body">
+                @if (!_inventory.Products.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-box text-muted" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No products in this inventory yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var (productId, quantity) in _inventory.Products)
+                                {
+                                    <tr>
+                                        <td>
+                                            <ProductComponent ProductId="@productId" Quantity="@quantity" />
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <button class="btn btn-sm btn-outline-secondary me-2"
+                                                        @onclick="() => UpdateProductQuantityAsync(productId, quantity - 1)"
+                                                        disabled="@(quantity <= 1)">
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                                <span>@quantity</span>
+                                                <button class="btn btn-sm btn-outline-secondary ms-2"
+                                                        @onclick="() => UpdateProductQuantityAsync(productId, quantity + 1)">
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => RemoveProductAsync(productId)">
+                                                <i class="bi bi-trash"></i> Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <button class="btn btn-outline-danger" @onclick="ShowDeleteConfirmation">
+                <i class="bi bi-trash"></i> Delete Inventory
+            </button>
+        </div>
+
+        @if (_showDeleteConfirm)
+        {
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete the inventory "<strong>@_inventory.Name</strong>"?</p>
+                            <p class="text-danger">This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                            <button type="button" class="btn btn-danger" @onclick="DeleteInventoryAsync">
+                                @if (_isDeleting)
+                                {
+                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span class="ms-2">Deleting...</span>
+                                }
+                                else
+                                {
+                                    <span>Delete Inventory</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Inventory Not Found</h4>
+            <p>The inventory you're looking for doesn't exist or has been deleted.</p>
+            <button class="btn btn-primary" @onclick="NavigateToInventories">Back to Inventories</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private InventoryDto? _inventory;
+    private UserInfo? _currentUser;
+    private bool _isLoading = true;
+    private bool _isDeleting;
+    private bool _showDeleteConfirm;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check authentication
+        var isAuthenticated = await UserService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        // Get current user
+        _currentUser = await UserService.GetCurrentUserAsync();
+        if (_currentUser is null)
+        {
+            _error = "Unable to retrieve user information.";
+            _isLoading = false;
+            return;
+        }
+
+        await LoadInventoryAsync();
+    }
+
+    private async Task LoadInventoryAsync()
+    {
+        _isLoading = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+            var response = await client.GetAsync(new Uri($"/inventory/{Id}", UriKind.Relative));
+
+            if (response.IsSuccessStatusCode)
+            {
+                _inventory = await response.Content.ReadFromJsonAsync<InventoryDto>();
+
+                // Verify if the inventory belongs to the current user
+                if (_inventory?.UserId != _currentUser?.Id)
+                {
+                    _error = "You do not have permission to view this inventory.";
+                    _inventory = null;
+                }
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _inventory = null;
+            }
+            else
+            {
+                _error = $"Failed to load inventory: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateProductQuantityAsync(Guid productId, int newQuantity)
+    {
+        if (_inventory is null || newQuantity < 0) return;
+
+        try
+        {
+            // Create a copy of the inventory for the update
+            var updatedInventory = _inventory with
+            {
+                Products = new Dictionary<Guid, int>(_inventory.Products)
+            };
+
+            if (newQuantity == 0)
+            {
+                updatedInventory.Products.Remove(productId);
+            }
+            else
+            {
+                updatedInventory.Products[productId] = newQuantity;
+            }
+
+            var client = HttpClientFactory.CreateClient("api");
+            var response = await client.PutAsJsonAsync(new Uri($"/inventory/{Id}", UriKind.Relative), updatedInventory);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _inventory = updatedInventory;
+            }
+            else
+            {
+                _error = $"Failed to update product quantity: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task RemoveProductAsync(Guid productId)
+    {
+        if (_inventory is null)
+        {
+            return;
+        }
+        await UpdateProductQuantityAsync(productId, 0);
+    }
+
+    private void ShowDeleteConfirmation()
+    {
+        _showDeleteConfirm = true;
+    }
+
+    private void CancelDelete()
+    {
+        _showDeleteConfirm = false;
+    }
+
+    private async Task DeleteInventoryAsync()
+    {
+        if (_inventory is null) return;
+
+        _isDeleting = true;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+            var response = await client.DeleteAsync(new Uri($"/inventory/{Id}?userId={_currentUser?.Id}", UriKind.Relative));
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigateToInventories();
+            }
+            else
+            {
+                _error = $"Failed to delete inventory: {response.ReasonPhrase}";
+                _showDeleteConfirm = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+            _showDeleteConfirm = false;
+            StateHasChanged();
+        }
+        finally
+        {
+            _isDeleting = false;
+        }
+    }
+
+    private void NavigateToInventories()
+    {
+        NavigationManager.NavigateTo("/inventories");
+    }
+
+    private void EditInventory(Guid? id)
+    {
+        NavigationManager.NavigateTo($"/inventory/edit/{id}?userId={_currentUser?.Id}");
+    }
+
+    private void NavigateToAddProducts(Guid? id)
+    {
+        NavigationManager.NavigateTo($"/inventory/{id}/products/add");
+    }
+}

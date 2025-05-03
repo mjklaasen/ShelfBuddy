@@ -1,0 +1,239 @@
+﻿@page "/inventories"
+@using ShelfBuddy.Contracts
+@using ShelfBuddy.ClientInterface.Components.Shared
+@inject IHttpClientFactory HttpClientFactory
+@inject IUserService UserService
+
+<PageTitle>My Inventories</PageTitle>
+
+<div class="inventory-page">
+    <h1>My Inventories</h1>
+
+    @if (_isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading your inventories...</p>
+        </div>
+    }
+    else if (_error is not null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Error Loading Inventories</h4>
+            <p>@_error</p>
+            <button class="btn btn-primary mt-2" @onclick="LoadInventoriesAsync">Try Again</button>
+        </div>
+    }
+    else if (_inventories is null || !_inventories.Any())
+    {
+        <div class="empty-state">
+            <h3>No Inventories Found</h3>
+            <p>You don't have any inventories yet. Create your first inventory to get started.</p>
+            <button class="btn btn-primary mt-2" @onclick="NavigateToNewInventory">
+                <i class="bi bi-plus-circle"></i> Create New Inventory
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-3">
+            <div class="col">
+                <button class="btn btn-primary" @onclick="NavigateToNewInventory">
+                    <i class="bi bi-plus-circle"></i> Add Inventory
+                </button>
+            </div>
+            <div class="col-auto">
+                <SearchBar OnClick="@ApplySearch" />
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Inventory Name</th>
+                        <th>Products</th>
+                        <th>Total Items</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var inventory in _filteredInventories)
+                    {
+                        <tr @onclick="() => ViewInventoryDetails(inventory.Id)">
+                            <td>@inventory.Name</td>
+                            <td>
+                                @if (inventory.Products.Count > 0)
+                                {
+                                    <div class="product-list">
+                                        @foreach (var (productId, quantity) in inventory.Products.Take(3))
+                                        {
+                                            <div class="product-item">
+                                                <ProductComponent ProductId="@productId" Quantity="@quantity" />
+                                            </div>
+                                        }
+                                        @if (inventory.Products.Count > 3)
+                                        {
+                                            <div class="more-products">+@(inventory.Products.Count - 3) more</div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No products</span>
+                                }
+                            </td>
+                            <td>@inventory.Products.Sum(p => p.Value)</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="@(() => EditInventory(inventory.Id))">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="@(() => DeleteInventoryAsync(inventory.Id))">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<InventoryDto>? _inventories;
+    private List<InventoryDto> _filteredInventories = [];
+    private bool _isLoading = true;
+    private string? _error;
+    private Guid _currentUserId;
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check authentication first
+        var isAuthenticated = await UserService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            // Redirect to login page
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        // Get current user
+        var user = await UserService.GetCurrentUserAsync();
+        if (user is not null)
+        {
+            _currentUserId = user.Id;
+            await LoadInventoriesAsync();
+        }
+        else
+        {
+            _error = "Unable to retrieve user information.";
+            _isLoading = false;
+        }
+    }
+    
+    private async Task LoadInventoriesAsync()
+    {
+        _isLoading = true;
+        _error = null;
+        StateHasChanged();
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // Modify the API call to include the user ID
+            var response = await client.GetAsync(new Uri($"/inventory?userId={_currentUserId}", UriKind.Relative));
+
+            if (response.IsSuccessStatusCode)
+            {
+                _inventories = await response.Content.ReadFromJsonAsync<List<InventoryDto>>();
+                ApplySearch("");
+            }
+            else
+            {
+                _error = $"Failed to load inventories: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ApplySearch(string searchTerm)
+    {
+        if (_inventories is null)
+        {
+            _filteredInventories = [];
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            _filteredInventories = _inventories.ToList();
+        }
+        else
+        {
+            _filteredInventories = _inventories
+                .Where(i => i.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+
+    private void NavigateToNewInventory()
+    {
+        // Pass the current user ID when creating a new inventory
+        NavigationManager.NavigateTo($"/inventory/new?userId={_currentUserId}");
+    }
+
+    private void ViewInventoryDetails(Guid? id)
+    {
+        NavigationManager.NavigateTo($"/inventory/{id}");
+    }
+
+    private void EditInventory(Guid? id)
+    {
+        NavigationManager.NavigateTo($"/inventory/edit/{id}?userId={_currentUserId}");
+    }
+
+    private async Task DeleteInventoryAsync(Guid? id)
+    {
+        // TODO: Show confirmation dialog
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // We should ensure we're only deleting our own inventories
+            var response = await client.DeleteAsync(new Uri($"/inventory/{id}?userId={_currentUserId}", UriKind.Relative));
+
+            if (response.IsSuccessStatusCode)
+            {
+                await LoadInventoriesAsync();
+            }
+            else
+            {
+                _error = $"Failed to delete inventory: {response.ReasonPhrase}";
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+}

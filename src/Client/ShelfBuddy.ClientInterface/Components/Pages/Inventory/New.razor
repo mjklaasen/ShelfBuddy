@@ -1,0 +1,151 @@
+﻿@page "/inventory/new"
+@using System.ComponentModel.DataAnnotations
+@using ShelfBuddy.Contracts
+@inject IHttpClientFactory HttpClientFactory
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create New Inventory</PageTitle>
+
+<div class="inventory-form-container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Create New Inventory</h1>
+        <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+            <i class="bi bi-arrow-left"></i> Back to Inventories
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">Error</h4>
+            <p>@_error</p>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-body">
+            <EditForm Model="@_inventoryModel" OnValidSubmit="CreateInventoryAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Inventory Name</label>
+                    <InputText id="name" @bind-Value="_inventoryModel.Name" class="form-control" placeholder="Enter inventory name" />
+                    <ValidationMessage For="@(() => _inventoryModel.Name)" />
+                    <div class="form-text">Give your inventory a descriptive name.</div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="NavigateBack">Cancel</button>
+                    <button type="submit" class="btn btn-primary" disabled="@_isCreating">
+                        @if (_isCreating)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="ms-2">Creating...</span>
+                        }
+                        else
+                        {
+                            <span>Create Inventory</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private readonly InventoryModel _inventoryModel = new();
+    private bool _isCreating = false;
+    private string? _error;
+    private Guid _currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check authentication
+        var isAuthenticated = await UserService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        // Get current user
+        var user = await UserService.GetCurrentUserAsync();
+        if (user is null)
+        {
+            _error = "Unable to retrieve user information.";
+            return;
+        }
+
+        _currentUserId = user.Id;
+    }
+
+    private async Task CreateInventoryAsync()
+    {
+        _isCreating = true;
+        _error = null;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("api");
+
+            // Create the request object
+            
+            var createRequest = new
+            {
+                Name = _inventoryModel.Name,
+                UserId = _currentUserId
+            };
+
+            // Send the POST request to create the inventory
+            var response = await client.PostAsJsonAsync("/inventory", createRequest);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<InventoryDto>();
+                // Navigate to the inventory details page
+                NavigationManager.NavigateTo($"/inventory/{result?.Id}");
+            }
+            else
+            {
+                _error = $"Failed to create inventory: {response.ReasonPhrase}";
+
+                // Try to read more detailed error if available
+                try
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrEmpty(errorContent))
+                    {
+                        _error += $" - {errorContent}";
+                    }
+                }
+                catch { /* Ignore error reading content */ }
+            }
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _isCreating = false;
+            StateHasChanged();
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/inventories");
+    }
+
+    // Model class for form validation
+    public class InventoryModel
+    {
+        [Required(ErrorMessage = "Inventory name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        [MinLength(3, ErrorMessage = "Name must be at least 3 characters")]
+        public string Name { get; set; } = string.Empty;
+    }
+}

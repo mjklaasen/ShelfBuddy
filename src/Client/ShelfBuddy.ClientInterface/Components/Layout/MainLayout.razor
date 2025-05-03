@@ -1,0 +1,60 @@
+﻿@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <main>
+        <div class="status-bar">
+            <div class="app-title">ShelfBuddy</div>
+            <div class="user-section">
+                @if (_isAuthenticated)
+                {
+                    <button class="icon-button" @onclick="LogoutAsync">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </button>
+                }
+            </div>
+        </div>
+        
+        <div class="content-container">
+            @Body
+        </div>
+    </main>
+    
+    <footer class="bottom-nav">
+        <NavMenu />
+    </footer>
+</div>
+
+@code {
+    private bool _isAuthenticated;
+    private string _username = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthStatusAsync();
+    }
+
+    private async Task CheckAuthStatusAsync()
+    {
+        _isAuthenticated = await UserService.IsAuthenticatedAsync();
+        if (_isAuthenticated)
+        {
+            var user = await UserService.GetCurrentUserAsync();
+            _username = user?.Username ?? "";
+        }
+        StateHasChanged();
+    }
+
+    private async Task LogoutAsync()
+    {
+        await UserService.LogoutAsync();
+        await CheckAuthStatusAsync();
+        NavigationManager.NavigateTo("/login");
+    }
+
+    private void NavigateToLogin()
+    {
+        NavigationManager.NavigateTo("/login");
+    }
+}

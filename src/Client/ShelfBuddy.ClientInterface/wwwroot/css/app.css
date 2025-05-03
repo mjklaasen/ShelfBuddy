@@ -1,0 +1,360 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Light theme variables */
+    --primary: #4361EE;
+    --primary-light: #6780f7;
+    --secondary: #7209B7;
+    --accent: #F72585;
+    --background: #F5F7FA;
+    --card-bg: #FFFFFF;
+    --text: #333333;
+    --text-light: #666666;
+    --border: #EAEAEA;
+    --success: #10B981;
+    --warning: #FBBF24;
+    --danger: #EF4444;
+    --input-bg: #FFFFFF;
+    --input-focus-bg: var(--input-bg);
+    --input-text: #333333;
+    --table-bg: #FFFFFF;
+    --table-header-bg: rgba(67, 97, 238, 0.05);
+    --table-border: #EAEAEA;
+    --table-hover: rgba(67, 97, 238, 0.05);
+    --card-header-bg: var(--table-header-bg);
+}
+
+/* Dark theme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary: #4361EE;
+        --primary-light: #6780f7;
+        --secondary: #7209B7;
+        --accent: #F72585;
+        --background: #121212;
+        --card-bg: #1E1E1E;
+        --text: #FFFFFF;
+        --text-light: #AAAAAA;
+        --border: #333333;
+        --input-bg: #2D2D2D;
+        --input-focus-bg: rgba(65, 65, 65, 0.8);
+        --input-text: #FFFFFF;
+        --table-bg: #1E1E1E;
+        --table-header-bg: rgba(64, 64, 64, 0.5);
+        --table-border: #333333;
+        --table-hover: rgba(67, 97, 238, 0.1);
+        --card-header-bg: var(--card-bg);
+    }
+}
+
+html, body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* Form elements */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    background-color: var(--input-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.2s;
+    width: 100%;
+    color: var(--input-text);
+}
+
+.form-control:focus {
+    --border: var(--primary);
+    border-color: var(--border);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    background-color: var(--input-focus-bg);
+    color: var(--text);
+}
+
+    /* Input placeholder color */
+    .form-control::placeholder {
+        color: var(--text-light);
+        opacity: 0.7;
+    }
+
+/* Table styling for inventory */
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    background-color: var(--table-bg);
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    color: var(--text);
+    --bs-table-color: var(--text);
+    background-color: var(--table-bg);
+    --bs-table-bg: var(--table-bg);
+    border-color: var(--table-border);
+}
+
+    .table th {
+        background-color: var(--table-header-bg);
+        color: var(--text);
+        font-weight: 600;
+        text-align: left;
+        padding: 1rem;
+        border-color: var(--table-border);
+    }
+
+    .table td {
+        padding: 1rem;
+        border-color: var(--table-border);
+    }
+
+    .table tbody {
+        background-color: var(--table-bg);
+    }
+
+.table-light {
+    background-color: var(--table-header-bg);
+    color: var(--text);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--table-hover);
+    color: var(--text);
+    --bs-table-hover-color: var(--text);
+}
+
+/* Card styling */
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-color: var(--border);
+}
+
+    .card:active {
+        transform: scale(0.98);
+    }
+
+.card-body {
+    background: var(--card-bg);
+    color: var(--text);
+} 
+
+.card-header {
+    background-color: var(--card-header-bg);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--card-bg);
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: var(--primary-light);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
+    }
+
+.btn-secondary {
+    background-color: var(--secondary);
+    color: white;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--border);
+    color: var(--text);
+}
+
+/* Icon button */
+.icon-button {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Lists */
+.list-item {
+    background: var(--card-bg);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+    .list-item:active {
+        transform: scale(0.98);
+    }
+
+/* Animation for page transitions */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.content-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Empty state styling */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--text-light);
+}
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+/* Fix for Bootstrap text-muted in dark mode */
+.text-muted {
+    color: var(--text-light) !important;
+}
+
+/* Button outline fixes for dark mode */
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-danger {
+    color: var(--text);
+    border-color: var(--border);
+}
+
+    .btn-outline-primary:hover, .btn-outline-secondary:hover {
+        color: var(--primary);
+        background-color: rgba(67, 97, 238, 0.1);
+    }
+
+    .btn-outline-danger:hover {
+        color: var(--danger);
+        background-color: rgba(239, 68, 68, 0.1);
+    }
+
+.input-group {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+    .input-group .form-control {
+        border-right: none;
+    }
+
+    .input-group .btn {
+        border-color: var(--border);
+        background-color: var(--input-bg);
+        color: var(--text);
+    }
+
+@media (max-width: 576px) {
+    /* Increase tap target sizes on small screens */
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+    }
+
+    /* Make form controls more touch-friendly */
+    .form-control {
+        padding: 0.6rem 0.8rem;
+    }
+
+    /* Adjust table display for narrow screens */
+    .table-responsive-sm {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Make full-width cards */
+    .card {
+        padding: 0.75rem;
+    }
+
+    /* Stack side-by-side columns on mobile */
+    .row-cols-mobile-1 > * {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    /* Smaller headings on mobile */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    /* Adjust input fields for better mobile experience */
+    .quantity-input {
+        width: 75px !important;
+        min-width: 75px !important;
+    }
+}
+
+/* Additional helper classes */
+.text-truncate-sm {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.w-auto-sm {
+    width: auto !important;
+}

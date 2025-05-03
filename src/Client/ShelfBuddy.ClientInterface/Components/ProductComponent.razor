@@ -1,0 +1,28 @@
+﻿@using ShelfBuddy.Contracts
+
+@if (_product is null)
+{
+    return;
+}
+
+<span>@(_product.Name)</span>
+
+@code {
+    [Parameter]
+    public Guid ProductId { get; set; }
+    [Parameter]
+    public int Quantity { get; set; }
+
+    [Inject]
+    public IHttpClientFactory HttpClientFactory { get; set; } = default!;
+
+    private ProductDto? _product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var client = HttpClientFactory.CreateClient("api");
+        _product = await client.GetFromJsonAsync<ProductDto>(new Uri($"/product/{ProductId}", UriKind.Relative));
+    }
+
+}

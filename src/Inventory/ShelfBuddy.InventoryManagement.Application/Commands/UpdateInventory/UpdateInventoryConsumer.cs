@@ -69,6 +69,16 @@ public class UpdateInventoryConsumer(IInventoryRepository inventoryRepository, I
             }
         }
 
+        var productsToRemove = inventory.Products
+            .Where(p => !message.Products.ContainsKey(p.Key))
+            .Select(p => p.Key)
+            .ToList();
+
+        foreach (var productId in productsToRemove)
+        {
+            inventory.RemoveProduct(productId, inventory.GetProductQuantity(productId));
+        }
+
         return errors.Count > 0
             ? errors
             : Result.Updated;

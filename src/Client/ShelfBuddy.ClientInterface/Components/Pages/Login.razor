@@ -1,0 +1,91 @@
+﻿@page "/login"
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+
+<div class="login-page">
+    <div class="login-header">
+        <img src="images/logo.png" alt="ShelfBuddy Logo" class="login-logo" />
+        <h1>ShelfBuddy</h1>
+        <p>Inventory management simplified</p>
+    </div>
+
+    <div class="login-form">
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+                @_errorMessage
+            </div>
+        }
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <div class="input-with-icon">
+                <i class="bi bi-person"></i>
+                <input type="text" id="username" class="form-control" placeholder="Enter username" @bind="_username" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-with-icon">
+                <i class="bi bi-lock"></i>
+                <input type="password" id="password" class="form-control" placeholder="Enter password" @bind="_password" />
+            </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" @onclick="LoginAsync">
+            <i class="bi bi-box-arrow-in-right"></i>
+            Sign In
+        </button>
+    </div>
+
+    <div class="demo-users card">
+        <h5><i class="bi bi-info-circle"></i> Demo Accounts</h5>
+        <div class="demo-user-badge" @onclick="@(() => SetDemoUser("user1"))">user1</div>
+        <div class="demo-user-badge" @onclick="@(() => SetDemoUser("user2"))">user2</div>
+        <div class="demo-user-badge" @onclick="@(() => SetDemoUser("admin"))">admin</div>
+        <small>Click any username to use it (any password works)</small>
+    </div>
+</div>
+
+@code {
+    private string _username = "";
+    private string _password = "";
+    private string _errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // If already logged in, redirect to inventories
+        if (await UserService.IsAuthenticatedAsync())
+        {
+            NavigationManager.NavigateTo("/inventories");
+        }
+    }
+
+    private void SetDemoUser(string username)
+    {
+        _username = username;
+        _password = "password";
+    }
+
+    private async Task LoginAsync()
+    {
+        if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(_password))
+        {
+            _errorMessage = "Username and password are required.";
+            return;
+        }
+
+        var result = await UserService.LoginAsync(_username, _password);
+
+        if (result)
+        {
+            NavigationManager.NavigateTo("/inventories");
+        }
+        else
+        {
+            _errorMessage = "Invalid username or password.";
+        }
+    }
+}
