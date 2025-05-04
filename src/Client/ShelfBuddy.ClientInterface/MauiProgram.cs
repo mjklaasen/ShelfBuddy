@@ -18,9 +18,19 @@ namespace ShelfBuddy.ClientInterface
 
             builder.Services.AddHttpClient("api", client =>
                 {
-                    // 10.0.2.2 is the special IP address to connect to the host machine from Android emulator
+                    
 #if ANDROID
-                    client.BaseAddress = new Uri("https://10.0.2.2:7088");
+                    if (Environment.OSVersion.VersionString.Contains("35"))
+                    {
+                        // 10.0.2.2 is the special IP address to connect to the host machine from Android emulator
+                        client.BaseAddress = new Uri("https://10.0.2.2:7088");
+                    }
+                    else
+                    {
+                        // For physical phone, but doesn't work, need to fix.
+                        client.BaseAddress = new Uri("https://192.168.178.50:7088");
+                    }
+                    
 #else
                     client.BaseAddress = new Uri("https://localhost:7088");
 #endif
