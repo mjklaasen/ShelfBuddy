@@ -1,0 +1,21 @@
+﻿@page "/inventory/current"
+@using ShelfBuddy.ClientInterface.Services
+@inject IInventoryStateService InventoryStateService
+@inject NavigationManager NavigationManager
+@inject IUserService UserService
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await UserService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        NavigationManager.NavigateTo(InventoryStateService.CurrentInventory?.Id is not null
+            ? $"/inventory/{InventoryStateService.CurrentInventory.Id}"
+            : "/inventories");
+    }
+}

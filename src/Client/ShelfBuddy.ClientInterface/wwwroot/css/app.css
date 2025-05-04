@@ -74,14 +74,26 @@ html, body {
     color: var(--input-text);
 }
 
-.form-control:focus {
-    --border: var(--primary);
-    border-color: var(--border);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-    background-color: var(--input-focus-bg);
-    color: var(--text);
-}
+    .form-control:focus {
+        --border: var(--primary);
+        border-color: var(--border);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        background-color: var(--input-bg);
+        color: var(--text);
+    }
+
+    .form-control:-webkit-autofill,
+    .form-control:-webkit-autofill:hover,
+    .form-control:-webkit-autofill:focus,
+    .form-control:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px var(--input-bg) inset !important;
+        -webkit-text-fill-color: var(--input-text) !important;
+        transition: background-color 5000s ease-in-out 0s;
+        border-color: var(--border);
+        color: var(--text);
+        caret-color: var(--input-text);
+    }
 
     /* Input placeholder color */
     .form-control::placeholder {

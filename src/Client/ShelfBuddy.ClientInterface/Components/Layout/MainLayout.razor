@@ -1,11 +1,20 @@
-﻿@inject IUserService UserService
+﻿@using ShelfBuddy.ClientInterface.Services
+@using ShelfBuddy.ClientInterface.Components.Shared
+@inject IUserService UserService
 @inject NavigationManager NavigationManager
+@inject IInventoryStateService InventoryStateService
 @inherits LayoutComponentBase
 
 <div class="app-shell">
     <main>
         <div class="status-bar">
             <div class="app-title">ShelfBuddy</div>
+            @if (_isAuthenticated)
+            {
+                <div class="inventory-context">
+                    <InventorySwitcher />
+                </div>
+            }
             <div class="user-section">
                 @if (_isAuthenticated)
                 {
@@ -29,6 +38,7 @@
 @code {
     private bool _isAuthenticated;
     private string _username = "";
+    private Guid? _userId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -42,12 +52,20 @@
         {
             var user = await UserService.GetCurrentUserAsync();
             _username = user?.Username ?? "";
+            _userId = user?.Id;
+
+            if (_userId.HasValue && !InventoryStateService.HasActiveInventory)
+            {
+                await InventoryStateService.LoadDefaultInventoryAsync(_userId.Value);
+            }
         }
         StateHasChanged();
     }
 
     private async Task LogoutAsync()
     {
+        await InventoryStateService.SetCurrentInventoryAsync(null);
+
         await UserService.LogoutAsync();
         await CheckAuthStatusAsync();
         NavigationManager.NavigateTo("/login");

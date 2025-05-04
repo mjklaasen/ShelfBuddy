@@ -1,8 +1,9 @@
 ﻿@page "/inventories"
 @using ShelfBuddy.Contracts
 @using ShelfBuddy.ClientInterface.Components.Shared
-@inject IHttpClientFactory HttpClientFactory
+@using ShelfBuddy.ClientInterface.Services
 @inject IUserService UserService
+@inject IInventoryStateService InventoryStateService
 
 <PageTitle>My Inventories</PageTitle>
 
@@ -62,7 +63,7 @@
                 <tbody>
                     @foreach (var inventory in _filteredInventories)
                     {
-                        <tr @onclick="() => ViewInventoryDetails(inventory.Id)">
+                        <tr @onclick="() => ViewInventoryDetailsAsync(inventory.Id)">
                             <td>@inventory.Name</td>
                             <td>
                                 @if (inventory.Products.Count > 0)
@@ -88,10 +89,10 @@
                             <td>@inventory.Products.Sum(p => p.Value)</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="@(() => EditInventory(inventory.Id))">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="@(() => EditInventory(inventory.Id))" @onclick:stopPropagation="true">
                                         <i class="bi bi-pencil"></i> Edit
                                     </button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="@(() => DeleteInventoryAsync(inventory.Id))">
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="@(() => DeleteInventoryAsync(inventory.Id))" @onclick:stopPropagation="true">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </div>
@@ -138,7 +139,7 @@
             _isLoading = false;
         }
     }
-    
+
     private async Task LoadInventoriesAsync()
     {
         _isLoading = true;
@@ -147,20 +148,16 @@
 
         try
         {
-            var client = HttpClientFactory.CreateClient("api");
+            _inventories = InventoryStateService.UserInventories;
 
-            // Modify the API call to include the user ID
-            var response = await client.GetAsync(new Uri($"/inventory?userId={_currentUserId}", UriKind.Relative));
+            // If no inventories were found in the cache, refresh from API
+            if (_inventories is null || !_inventories.Any())
+            {
+                await InventoryStateService.RefreshInventoriesAsync(_currentUserId);
+                _inventories = InventoryStateService.UserInventories;
+            }
 
-            if (response.IsSuccessStatusCode)
-            {
-                _inventories = await response.Content.ReadFromJsonAsync<List<InventoryDto>>();
-                ApplySearch("");
-            }
-            else
-            {
-                _error = $"Failed to load inventories: {response.ReasonPhrase}";
-            }
+            ApplySearch("");
         }
         catch (Exception ex)
         {
@@ -199,8 +196,12 @@
         NavigationManager.NavigateTo($"/inventory/new?userId={_currentUserId}");
     }
 
-    private void ViewInventoryDetails(Guid? id)
+    private async Task ViewInventoryDetailsAsync(Guid? id)
     {
+        if (id.HasValue)
+        {
+            await InventoryStateService.SetCurrentInventoryAsync(id.Value);
+        }
         NavigationManager.NavigateTo($"/inventory/{id}");
     }
 
@@ -211,29 +212,21 @@
 
     private async Task DeleteInventoryAsync(Guid? id)
     {
-        // TODO: Show confirmation dialog
-
-        try
+        if (id is null)
         {
-            var client = HttpClientFactory.CreateClient("api");
-
-            // We should ensure we're only deleting our own inventories
-            var response = await client.DeleteAsync(new Uri($"/inventory/{id}?userId={_currentUserId}", UriKind.Relative));
-
-            if (response.IsSuccessStatusCode)
-            {
-                await LoadInventoriesAsync();
-            }
-            else
-            {
-                _error = $"Failed to delete inventory: {response.ReasonPhrase}";
-                StateHasChanged();
-            }
+            return;
         }
-        catch (Exception ex)
+
+        var deleteInventoriesResult = await InventoryStateService.DeleteInventoryAsync(id.Value);
+
+        if (deleteInventoriesResult.IsError)
         {
-            _error = $"Error: {ex.Message}";
+            _error = deleteInventoriesResult.Errors.First().Description;
             StateHasChanged();
+            return;
         }
+        _inventories = InventoryStateService.UserInventories;
+                
+        ApplySearch("");
     }
 }

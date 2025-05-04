@@ -1,8 +1,11 @@
 ﻿@page "/inventory/{Id:guid}"
+@using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 @inject IHttpClientFactory HttpClientFactory
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
+@inject IInventoryStateService InventoryStateService
+@implements IDisposable
 
 <PageTitle>Inventory Details</PageTitle>
 
@@ -98,20 +101,20 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 <button class="btn btn-sm btn-outline-secondary me-2"
-                                                        @onclick="() => UpdateProductQuantityAsync(productId, quantity - 1)"
-                                                        disabled="@(quantity <= 1)">
+                                                @onclick="() => UpdateProductQuantityAsync(productId, quantity - 1)"
+                                                disabled="@(quantity <= 1)">
                                                     <i class="bi bi-dash"></i>
                                                 </button>
                                                 <span>@quantity</span>
                                                 <button class="btn btn-sm btn-outline-secondary ms-2"
-                                                        @onclick="() => UpdateProductQuantityAsync(productId, quantity + 1)">
+                                                @onclick="() => UpdateProductQuantityAsync(productId, quantity + 1)">
                                                     <i class="bi bi-plus"></i>
                                                 </button>
                                             </div>
                                         </td>
                                         <td>
                                             <button class="btn btn-sm btn-outline-danger"
-                                                    @onclick="() => RemoveProductAsync(productId)">
+                                            @onclick="() => RemoveProductAsync(productId)">
                                                 <i class="bi bi-trash"></i> Remove
                                             </button>
                                         </td>
@@ -186,6 +189,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        InventoryStateService.InventoryPageRefreshRequested += RefreshPageAsync;
+
         // Check authentication
         var isAuthenticated = await UserService.IsAuthenticatedAsync();
         if (!isAuthenticated)
@@ -318,19 +323,24 @@
 
         try
         {
-            var client = HttpClientFactory.CreateClient("api");
-            var response = await client.DeleteAsync(new Uri($"/inventory/{Id}?userId={_currentUser?.Id}", UriKind.Relative));
-
-            if (response.IsSuccessStatusCode)
+            var deleteInventoryResult = await InventoryStateService.DeleteInventoryAsync(Id);
+            if (deleteInventoryResult.IsError)
             {
-                NavigateToInventories();
-            }
-            else
-            {
-                _error = $"Failed to delete inventory: {response.ReasonPhrase}";
+                _error = deleteInventoryResult.FirstError.Description;
                 _showDeleteConfirm = false;
                 StateHasChanged();
+                return;
             }
+
+            if (InventoryStateService.HasActiveInventory && InventoryStateService.CurrentInventory?.Id is not null)
+            {
+                _showDeleteConfirm = false;
+                Id = InventoryStateService.CurrentInventory.Id.Value;
+                await LoadInventoryAsync();
+                return;
+            }
+
+            NavigateToInventories();
         }
         catch (Exception ex)
         {
@@ -357,5 +367,23 @@
     private void NavigateToAddProducts(Guid? id)
     {
         NavigationManager.NavigateTo($"/inventory/{id}/products/add");
+    }
+
+    private async Task RefreshPageAsync()
+    {
+        if (InventoryStateService.CurrentInventory?.Id is null)
+        {
+            _error = "This inventory does not exist or has been deleted.";
+            return;
+        }
+
+        Id = InventoryStateService.CurrentInventory.Id.Value;
+        await LoadInventoryAsync();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        InventoryStateService.InventoryPageRefreshRequested -= RefreshPageAsync;
     }
 }

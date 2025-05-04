@@ -1,0 +1,28 @@
+﻿.app-shell .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: var(--bs-dark);
+    color: white;
+}
+
+.app-shell .app-title {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.app-shell .inventory-context {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.inventory-switcher .dropdown-menu {
+    min-width: 200px;
+}
+
+.inventory-switcher .dropdown-item.active {
+    background-color: var(--bs-primary);
+    color: white;
+}

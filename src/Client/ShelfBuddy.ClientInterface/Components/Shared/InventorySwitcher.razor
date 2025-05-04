@@ -1,0 +1,127 @@
+﻿@using ShelfBuddy.ClientInterface.Services
+@using ShelfBuddy.Contracts
+@inject IInventoryStateService InventoryStateService
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<div class="inventory-switcher">
+    @if (_isLoading)
+    {
+        <div class="spinner-border spinner-border-sm text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    }
+    else if (InventoryStateService.CurrentInventory is null)
+    {
+        <button class="btn btn-sm btn-outline-light" @onclick="NavigateToInventories">
+            <i class="bi bi-box"></i> Select Inventory
+        </button>
+    }
+    else
+    {
+        <div class="dropdown">
+            <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button"
+            @onclick="() => _isOpen = !_isOpen">
+                <i class="bi bi-box"></i> @InventoryStateService.CurrentInventory.Name
+            </button>
+            @if (_isOpen)
+            {
+                <div class="dropdown-menu show" style="position: absolute; z-index: 1000;">
+                    <h6 class="dropdown-header">Your Inventories</h6>
+                    @foreach (var inventory in _inventories)
+                    {
+                        <button class="dropdown-item @(InventoryStateService.CurrentInventory?.Id == inventory.Id ? "active" : "")"
+                        @onclick="() => SwitchInventoryAsync(inventory.Id)">
+                            @inventory.Name
+                        </button>
+                    }
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item" @onclick="NavigateToInventories">
+                        <i class="bi bi-grid"></i> View All Inventories
+                    </button>
+                    <button class="dropdown-item" @onclick="NavigateToNewInventory">
+                        <i class="bi bi-plus-circle"></i> Create New Inventory
+                    </button>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<InventoryDto> _inventories = [];
+    private bool _isLoading = true;
+    private bool _isOpen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        InventoryStateService.OnInventoryChanged += OnInventoryChanged;
+
+        await LoadUserAndInventoriesAsync();
+    }
+
+    private void OnInventoryChanged()
+    {
+        _inventories = InventoryStateService.UserInventories;
+        StateHasChanged();
+    }
+
+    private async Task LoadUserAndInventoriesAsync()
+    {
+        _isLoading = true;
+        StateHasChanged();
+
+        var user = await UserService.GetCurrentUserAsync();
+        if (user is not null)
+        {
+            await InventoryStateService.LoadUserInventoriesAsync(user.Id);
+            _inventories = InventoryStateService.UserInventories;
+        }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private void NavigateToInventories()
+    {
+        _isOpen = false;
+        NavigationManager.NavigateTo("/inventories");
+    }
+
+    private void NavigateToNewInventory()
+    {
+        _isOpen = false;
+        NavigationManager.NavigateTo("/inventory/new");
+    }
+
+    private async Task SwitchInventoryAsync(Guid? inventoryId)
+    {
+        _isOpen = false;
+        await InventoryStateService.SetCurrentInventoryAsync(inventoryId);
+
+        if (inventoryId is null)
+        {
+            return;
+        }
+
+        var currentUri = NavigationManager.Uri;
+        var isOnDetailsPage = System.Text.RegularExpressions.Regex.IsMatch(
+            currentUri,
+            @"/inventory/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+        );
+
+        if (isOnDetailsPage)
+        {
+            await InventoryStateService.NotifyInventoryPageRefreshRequestedAsync();
+            return;
+        }
+
+        NavigationManager.NavigateTo($"/inventory/{inventoryId}");
+    }
+    
+    public void Dispose()
+    {
+        InventoryStateService.OnInventoryChanged -= OnInventoryChanged;
+    }
+}

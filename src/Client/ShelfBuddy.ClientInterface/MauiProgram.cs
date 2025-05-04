@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ShelfBuddy.ClientInterface.Services;
 
 namespace ShelfBuddy.ClientInterface
 {
@@ -51,10 +52,11 @@ namespace ShelfBuddy.ClientInterface
     		builder.Logging.AddDebug();
 #endif
 
-            builder.Services.AddSingleton(Preferences.Default);
+            builder.Services
+                .AddSingleton(Preferences.Default)
+                .AddSingleton<IUserService>(sp => new MockUserService(sp.GetRequiredService<IPreferences>()))
+                .AddScoped<IInventoryStateService, InventoryStateService>();
 
-            builder.Services.AddSingleton<IUserService>(sp =>
-                new MockUserService(sp.GetRequiredService<IPreferences>()));
             return builder.Build();
         }
     }

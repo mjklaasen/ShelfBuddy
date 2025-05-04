@@ -1,9 +1,11 @@
 ﻿@page "/inventory/new"
 @using System.ComponentModel.DataAnnotations
+@using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 @inject IHttpClientFactory HttpClientFactory
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
+@inject IInventoryStateService InventoryStateService
 
 <PageTitle>Create New Inventory</PageTitle>
 
@@ -91,38 +93,35 @@
         {
             var client = HttpClientFactory.CreateClient("api");
 
-            // Create the request object
-            
             var createRequest = new
             {
                 Name = _inventoryModel.Name,
                 UserId = _currentUserId
             };
 
-            // Send the POST request to create the inventory
             var response = await client.PostAsJsonAsync("/inventory", createRequest);
 
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<InventoryDto>();
-                // Navigate to the inventory details page
-                NavigationManager.NavigateTo($"/inventory/{result?.Id}");
-            }
-            else
-            {
-                _error = $"Failed to create inventory: {response.ReasonPhrase}";
+                await InventoryStateService.RefreshInventoriesAsync(_currentUserId);
+                await InventoryStateService.SetCurrentInventoryAsync(result?.Id);
 
-                // Try to read more detailed error if available
-                try
-                {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    if (!string.IsNullOrEmpty(errorContent))
-                    {
-                        _error += $" - {errorContent}";
-                    }
-                }
-                catch { /* Ignore error reading content */ }
+                NavigationManager.NavigateTo($"/inventory/{result?.Id}");
+                return;
             }
+            
+            _error = $"Failed to create inventory: {response.ReasonPhrase}";
+
+            try
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                if (!string.IsNullOrEmpty(errorContent))
+                {
+                    _error += $" - {errorContent}";
+                }
+            }
+            catch { /* Ignore error reading content */ }
         }
         catch (Exception ex)
         {
