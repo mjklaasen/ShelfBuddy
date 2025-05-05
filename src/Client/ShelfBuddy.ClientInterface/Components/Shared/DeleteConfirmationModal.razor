@@ -1,0 +1,37 @@
+﻿@namespace ShelfBuddy.ClientInterface.Components.Shared
+
+<Modal @ref="_modal" Title="Confirm Delete" ConfirmText="Delete" OnConfirm="ConfirmDeleteAsync" ShowCancelButton="true" IsDanger="true">
+    <p>Are you sure you want to delete the @ItemType "<strong>@ItemName</strong>"?</p>
+    <p class="text-danger">This action cannot be undone.</p>
+</Modal>
+
+@code {
+    private Modal _modal = null!;
+
+    [Parameter]
+    public string ItemType { get; set; } = "item";
+
+    [Parameter]
+    public string ItemName { get; set; } = "";
+
+    [Parameter]
+    public EventCallback OnDelete { get; set; }
+
+    [Parameter]
+    public bool IsDeleting { get; set; }
+
+    public void Show()
+    {
+        _modal.Show();
+    }
+
+    private async Task ConfirmDeleteAsync()
+    {
+        await OnDelete.InvokeAsync();
+    }
+
+    public void Close()
+    {
+        _modal.Close();
+    }
+}

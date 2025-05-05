@@ -1,6 +1,7 @@
 ﻿@page "/inventory/{Id:guid}"
 @using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
+@using ShelfBuddy.ClientInterface.Components.Shared
 @inject IHttpClientFactory HttpClientFactory
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
@@ -133,38 +134,11 @@
             </button>
         </div>
 
-        @if (_showDeleteConfirm)
-        {
-            <div class="modal-backdrop fade show"></div>
-            <div class="modal fade show d-block" tabindex="-1" role="dialog">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Confirm Delete</h5>
-                            <button type="button" class="btn-close" @onclick="CancelDelete"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Are you sure you want to delete the inventory "<strong>@_inventory.Name</strong>"?</p>
-                            <p class="text-danger">This action cannot be undone.</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
-                            <button type="button" class="btn btn-danger" @onclick="DeleteInventoryAsync">
-                                @if (_isDeleting)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span class="ms-2">Deleting...</span>
-                                }
-                                else
-                                {
-                                    <span>Delete Inventory</span>
-                                }
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
+        <DeleteConfirmationModal @ref="_deleteConfirmationModal" 
+                                 ItemType="inventory"
+                                 ItemName="@(_inventory?.Name)"
+                                 OnDelete="DeleteInventoryAsync"
+                                 IsDeleting="_isDeleting" />
     }
     else
     {
@@ -184,8 +158,8 @@
     private UserInfo? _currentUser;
     private bool _isLoading = true;
     private bool _isDeleting;
-    private bool _showDeleteConfirm;
     private string? _error;
+    private DeleteConfirmationModal _deleteConfirmationModal = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -307,12 +281,7 @@
 
     private void ShowDeleteConfirmation()
     {
-        _showDeleteConfirm = true;
-    }
-
-    private void CancelDelete()
-    {
-        _showDeleteConfirm = false;
+        _deleteConfirmationModal.Show();
     }
 
     private async Task DeleteInventoryAsync()
@@ -327,14 +296,12 @@
             if (deleteInventoryResult.IsError)
             {
                 _error = deleteInventoryResult.FirstError.Description;
-                _showDeleteConfirm = false;
                 StateHasChanged();
                 return;
             }
 
             if (InventoryStateService.HasActiveInventory && InventoryStateService.CurrentInventory?.Id is not null)
             {
-                _showDeleteConfirm = false;
                 Id = InventoryStateService.CurrentInventory.Id.Value;
                 await LoadInventoryAsync();
                 return;
@@ -345,7 +312,6 @@
         catch (Exception ex)
         {
             _error = $"Error: {ex.Message}";
-            _showDeleteConfirm = false;
             StateHasChanged();
         }
         finally

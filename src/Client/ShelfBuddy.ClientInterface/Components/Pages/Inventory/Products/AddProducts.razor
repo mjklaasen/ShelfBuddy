@@ -62,10 +62,7 @@
                         else if (_searchPerformed && !_searchResults.Any())
                         {
                             <div class="alert alert-info" role="alert">
-                                No products found matching your search.
-                                <button class="btn btn-sm btn-outline-primary ms-2" @onclick="ShowNewProductForm">
-                                    Create New Product
-                                </button>
+                                <span class="mb-3">No products found matching your search.</span>
                             </div>
                         }
                         else @if (_searchResults.Any())

@@ -12,105 +12,114 @@
 
     @if (_isLoading)
     {
-        <div class="loading-container">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading your inventories...</p>
             </div>
-            <p>Loading your inventories...</p>
-        </div>
     }
     else if (_error is not null)
     {
-        <div class="alert alert-danger" role="alert">
-            <h4 class="alert-heading">Error Loading Inventories</h4>
-            <p>@_error</p>
-            <button class="btn btn-primary mt-2" @onclick="LoadInventoriesAsync">Try Again</button>
-        </div>
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Error Loading Inventories</h4>
+                <p>@_error</p>
+                <button class="btn btn-primary mt-2" @onclick="LoadInventoriesAsync">Try Again</button>
+            </div>
     }
     else if (_inventories is null || !_inventories.Any())
     {
-        <div class="empty-state">
-            <h3>No Inventories Found</h3>
-            <p>You don't have any inventories yet. Create your first inventory to get started.</p>
-            <button class="btn btn-primary mt-2" @onclick="NavigateToNewInventory">
-                <i class="bi bi-plus-circle"></i> Create New Inventory
-            </button>
-        </div>
+            <div class="empty-state">
+                <h3>No Inventories Found</h3>
+                <p>You don't have any inventories yet. Create your first inventory to get started.</p>
+                <button class="btn btn-primary mt-2" @onclick="NavigateToNewInventory">
+                    <i class="bi bi-plus-circle"></i> Create New Inventory
+                </button>
+            </div>
     }
     else
     {
-        <div class="row mb-3">
-            <div class="col">
-                <button class="btn btn-primary" @onclick="NavigateToNewInventory">
-                    <i class="bi bi-plus-circle"></i> Add Inventory
-                </button>
+            <div class="row mb-3">
+                <div class="col">
+                    <button class="btn btn-primary" @onclick="NavigateToNewInventory">
+                        <i class="bi bi-plus-circle"></i> Add Inventory
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <SearchBar OnClick="@ApplySearch" />
+                </div>
             </div>
-            <div class="col-auto">
-                <SearchBar OnClick="@ApplySearch" />
-            </div>
-        </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>Inventory Name</th>
-                        <th>Products</th>
-                        <th>Total Items</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Inventory Name</th>
+                            <th>Products</th>
+                            <th>Total Items</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     @foreach (var inventory in _filteredInventories)
                     {
-                        <tr @onclick="() => ViewInventoryDetailsAsync(inventory.Id)">
-                            <td>@inventory.Name</td>
-                            <td>
+                                <tr @onclick="() => ViewInventoryDetailsAsync(inventory.Id)">
+                                    <td>@inventory.Name</td>
+                                    <td>
                                 @if (inventory.Products.Count > 0)
                                 {
-                                    <div class="product-list">
+                                                <div class="product-list">
                                         @foreach (var (productId, quantity) in inventory.Products.Take(3))
                                         {
-                                            <div class="product-item">
-                                                <ProductComponent ProductId="@productId" Quantity="@quantity" />
-                                            </div>
+                                                            <div class="product-item">
+                                                                <ProductComponent ProductId="@productId" Quantity="@quantity" />
+                                                            </div>
                                         }
                                         @if (inventory.Products.Count > 3)
                                         {
-                                            <div class="more-products">+@(inventory.Products.Count - 3) more</div>
+                                                            <div class="more-products">+@(inventory.Products.Count - 3) more</div>
                                         }
-                                    </div>
+                                                </div>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">No products</span>
+                                                <span class="text-muted">No products</span>
                                 }
-                            </td>
-                            <td>@inventory.Products.Sum(p => p.Value)</td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-outline-primary" @onclick="@(() => EditInventory(inventory.Id))" @onclick:stopPropagation="true">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="@(() => DeleteInventoryAsync(inventory.Id))" @onclick:stopPropagation="true">
-                                        <i class="bi bi-trash"></i> Delete
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                                    </td>
+                                    <td>@inventory.Products.Sum(p => p.Value)</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="@(() => EditInventory(inventory.Id))" @onclick:stopPropagation="true">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="@(() => PrepareToDeleteInventory(inventory))" @onclick:stopPropagation="true">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+            </div>
     }
+
+    <DeleteConfirmationModal @ref="_deleteConfirmationModal" 
+                          ItemType="inventory"
+                          ItemName="@_inventoryToDelete?.Name"
+                          OnDelete="DeleteSelectedInventoryAsync"
+                          IsDeleting="_isDeleting" />
 </div>
 
 @code {
     private List<InventoryDto>? _inventories;
     private List<InventoryDto> _filteredInventories = [];
     private bool _isLoading = true;
+    private bool _isDeleting = false;
     private string? _error;
     private Guid _currentUserId;
+    private DeleteConfirmationModal _deleteConfirmationModal = null!;
+    private InventoryDto? _inventoryToDelete;
 
     [Inject]
     private NavigationManager NavigationManager { get; set; } = default!;
@@ -210,23 +219,39 @@
         NavigationManager.NavigateTo($"/inventory/edit/{id}?userId={_currentUserId}");
     }
 
-    private async Task DeleteInventoryAsync(Guid? id)
+    private void PrepareToDeleteInventory(InventoryDto inventory)
     {
-        if (id is null)
+        _inventoryToDelete = inventory;
+        _deleteConfirmationModal.Show();
+    }
+
+    private async Task DeleteSelectedInventoryAsync()
+    {
+        if (_inventoryToDelete?.Id is null)
         {
             return;
         }
 
-        var deleteInventoriesResult = await InventoryStateService.DeleteInventoryAsync(id.Value);
+        _isDeleting = true;
 
-        if (deleteInventoriesResult.IsError)
+        try
         {
-            _error = deleteInventoriesResult.Errors.First().Description;
-            StateHasChanged();
-            return;
+            var deleteInventoriesResult = await InventoryStateService.DeleteInventoryAsync(_inventoryToDelete.Id.Value);
+
+            if (deleteInventoriesResult.IsError)
+            {
+                _error = deleteInventoriesResult.Errors.First().Description;
+                StateHasChanged();
+                return;
+            }
+
+            _inventories = InventoryStateService.UserInventories;
+            ApplySearch("");
         }
-        _inventories = InventoryStateService.UserInventories;
-                
-        ApplySearch("");
+        finally
+        {
+            _isDeleting = false;
+            _deleteConfirmationModal.Close();
+        }
     }
 }

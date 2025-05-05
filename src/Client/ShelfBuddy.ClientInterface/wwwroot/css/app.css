@@ -23,6 +23,7 @@
     --table-border: #EAEAEA;
     --table-hover: rgba(67, 97, 238, 0.05);
     --card-header-bg: var(--table-header-bg);
+    --info-alert-bg: rgba(207, 244, 252, 0.7);
 }
 
 /* Dark theme */
@@ -45,6 +46,7 @@
         --table-border: #333333;
         --table-hover: rgba(67, 97, 238, 0.1);
         --card-header-bg: var(--card-bg);
+        --info-alert-bg: rgba(0, 89, 177, 0.7);
     }
 }
 
@@ -146,6 +148,7 @@ html, body {
     background-color: var(--table-hover);
     color: var(--text);
     --bs-table-hover-color: var(--text);
+    cursor: pointer;
 }
 
 /* Card styling */
@@ -296,7 +299,7 @@ html, body {
 
     .btn-outline-primary:hover, .btn-outline-secondary:hover {
         color: var(--primary);
-        background-color: rgba(67, 97, 238, 0.1);
+        background-color: rgba(67, 97, 238, 0.3);
     }
 
     .btn-outline-danger:hover {
@@ -369,4 +372,9 @@ html, body {
 
 .w-auto-sm {
     width: auto !important;
+}
+
+.alert-info {
+    background-color: var(--info-alert-bg);
+    color: var(--text);
 }
