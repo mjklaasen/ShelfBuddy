@@ -133,6 +133,7 @@ html, body {
     .table td {
         padding: 1rem;
         border-color: var(--table-border);
+        align-content: center;
     }
 
     .table tbody {
@@ -354,12 +355,27 @@ html, body {
     /* Smaller headings on mobile */
     h1 {
         font-size: 1.5rem !important;
+        padding-bottom: 1rem;
     }
 
     /* Adjust input fields for better mobile experience */
     .quantity-input {
         width: 75px !important;
         min-width: 75px !important;
+    }
+
+    .btn-group .btn {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .table th, .table td {
+        padding: 0.8rem;
+    }
+
+    .table td {
+        padding-bottom: 0.5rem;
+        padding-top: 0.5rem;
     }
 }
 

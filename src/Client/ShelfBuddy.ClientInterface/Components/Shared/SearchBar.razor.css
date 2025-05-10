@@ -78,3 +78,9 @@
 .search-group:focus-within {
     box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
 }
+
+@media (max-width: 455px) {
+    .search-group {
+        margin-top: 1rem;
+    }
+}

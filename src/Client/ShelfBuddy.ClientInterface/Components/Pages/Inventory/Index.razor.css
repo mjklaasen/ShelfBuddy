@@ -3,3 +3,9 @@
     margin: 0 auto;
     padding: 1.5rem;
 }
+
+@media(min-width: 576px) {
+    .table th:nth-child(3) {
+        padding-left: 2.5rem;
+    }
+}

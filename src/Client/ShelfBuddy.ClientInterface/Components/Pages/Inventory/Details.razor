@@ -66,7 +66,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div id="product-card" class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Products</h5>
                 <button class="btn btn-sm btn-success" @onclick="() => NavigateToAddProducts(_inventory.Id)">
@@ -93,6 +93,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                            @*TODO: make it so that if the screen has a width lower than some value, the text doesn't show for the delete button. Or else just don't show it at all*@
                                 @foreach (var (productId, quantity) in _inventory.Products)
                                 {
                                     <tr>

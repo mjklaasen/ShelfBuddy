@@ -45,6 +45,12 @@ main {
     padding-bottom: 2rem;
 }
 
+@media (max-width: 768px) {
+    .content-container {
+        padding: 0;
+    }
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;
