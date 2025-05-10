@@ -8,7 +8,12 @@
 <div class="app-shell">
     <main>
         <div class="status-bar">
-            <div class="app-title">ShelfBuddy</div>
+            <div class="app-title">
+                <button class="menu-toggle" @onclick="ToggleMenu">
+                    <i class="bi bi-list"></i>
+                </button>
+                <span>ShelfBuddy</span>
+            </div>
             @if (_isAuthenticated)
             {
                 <div class="inventory-context">
@@ -24,25 +29,45 @@
                 }
             </div>
         </div>
-        
+
         <div class="content-container">
             @Body
         </div>
     </main>
-    
-    <footer class="bottom-nav">
-        <NavMenu />
-    </footer>
+
+    <div class="side-menu @(_navMenu.IsOpen ? "menu-open" : "")">
+        <div class="menu-header">
+            <span>Menu</span>
+            <button class="menu-close" @onclick="ToggleMenu">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="menu-items">
+            <NavMenu @ref="_navMenu" />
+        </div>
+    </div>
+
+    @if (_navMenu.IsOpen)
+    {
+        <div class="menu-overlay" @onclick="ToggleMenu"></div>
+    }
 </div>
 
 @code {
     private bool _isAuthenticated;
     private string _username = "";
     private Guid? _userId;
+    private NavMenu _navMenu = new();
 
     protected override async Task OnInitializedAsync()
     {
         await CheckAuthStatusAsync();
+    }
+
+    private void ToggleMenu()
+    {
+        _navMenu.IsOpen = !_navMenu.IsOpen;
+        StateHasChanged();
     }
 
     private async Task CheckAuthStatusAsync()

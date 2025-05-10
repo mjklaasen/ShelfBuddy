@@ -91,84 +91,39 @@
     display: none;
 }
 
-.navbar-toggler:checked ~ .nav-scrollable {
-    display: block;
-}
-
-@media (min-width: 641px) {
-    .navbar-toggler {
-        display: none;
-    }
-
-    .nav-scrollable {
-        /* Never collapse the sidebar for wide screens */
-        display: block;
-        /* Allow sidebar to scroll for tall menus */
-        height: calc(100vh - 3.5rem);
-        overflow-y: auto;
-    }
-}
-
-/* Bottom menu navigation styling with 2rem icons */
-.bottom-menu {
+.side-nav {
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 0.5rem 0;
+    flex-direction: column;
+    width: 100%;
 }
 
-    .bottom-menu ::deep .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        color: var(--text-light);
-        text-decoration: none;
-        padding: 0.5rem;
-        transition: color 0.3s;
-        width: 100%;
-        position: relative;
-    }
-
-        .bottom-menu ::deep .nav-item span {
-            display: block;
-            text-align: center;
-            width: 100%;
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
-        }
-
-        .bottom-menu ::deep .nav-item i {
-            font-size: 2rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            margin: 0 auto 0.25rem;
-            margin-top: 0.5rem;
-            line-height: 1;
-        }
-
-        .bottom-menu ::deep .nav-item.active {
-            color: var(--primary);
-            font-weight: 500;
-        }
-
-.scan-button {
-    background-color: var(--primary);
-    color: white;
-    width: 5rem;
-    height: 5rem;
-    border-radius: 50%;
+::deep .side-nav-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-top: -2.5rem;
-    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+    padding: 1rem;
+    color: var(--text);
+    text-decoration: none;
+    transition: background-color 0.2s;
+    border-radius: 0.5rem;
+    margin: 0.25rem 1rem;
 }
 
-    .scan-button i {
-        font-size: 2.5rem !important;
-        margin: 0;
+::deep .side-nav-item:hover {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+    }
+
+::deep .side-nav-item.active {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+::deep .side-nav-item i {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+
+::deep .side-nav-item span {
+        font-size: 1rem;
     }

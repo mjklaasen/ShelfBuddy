@@ -1,27 +1,35 @@
-﻿<nav class="bottom-menu">
-    <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+﻿<div class="side-nav">
+    <NavLink class="side-nav-item" href="" Match="NavLinkMatch.All" @onclick="CloseMenu">
         <i class="bi bi-house-door"></i>
         <span>Home</span>
     </NavLink>
     
-    <NavLink class="nav-item" href="inventories">
+    <NavLink class="side-nav-item" href="inventories" @onclick="CloseMenu">
         <i class="bi bi-box-seam"></i>
         <span>Inventory</span>
     </NavLink>
     
-    <NavLink class="nav-item" href="scan">
-        <div class="scan-button">
-            <i class="bi bi-upc-scan"></i>
-        </div>
+    <NavLink class="side-nav-item" href="scan" @onclick="CloseMenu">
+        <i class="bi bi-upc-scan"></i>
+        <span>Scan</span>
     </NavLink>
     
-    <NavLink class="nav-item" href="reports">
+    <NavLink class="side-nav-item" href="reports" @onclick="CloseMenu">
         <i class="bi bi-bar-chart"></i>
         <span>Reports</span>
     </NavLink>
     
-    <NavLink class="nav-item" href="profile">
+    <NavLink class="side-nav-item" href="profile" @onclick="CloseMenu">
         <i class="bi bi-person"></i>
         <span>Profile</span>
     </NavLink>
-</nav>
+</div>
+
+@code {
+    public bool IsOpen { get; set; }
+
+    private void CloseMenu()
+    {
+        IsOpen = false;
+    }
+}
