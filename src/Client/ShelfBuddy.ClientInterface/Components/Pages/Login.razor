@@ -82,7 +82,7 @@
 
         if (result)
         {
-            NavigationManager.NavigateTo("/inventories");
+            NavigationManager.NavigateTo("/inventories", new NavigationOptions {ForceLoad = true, ReplaceHistoryEntry = true});
         }
         else
         {
