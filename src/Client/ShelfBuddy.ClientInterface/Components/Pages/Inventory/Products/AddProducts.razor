@@ -67,7 +67,7 @@
                                 <span class="mb-3">No products found matching your search.</span>
                             </div>
                         }
-                        else @if (_searchResults.Any())
+                        else if (_searchResults.Any())
                         {
                             <div class="product-list">
                                 @foreach (var product in _searchResults)

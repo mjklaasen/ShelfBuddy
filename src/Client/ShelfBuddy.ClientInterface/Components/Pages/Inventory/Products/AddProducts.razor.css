@@ -87,6 +87,9 @@
     border-radius: 8px;
     border: 1px solid var(--border);
 }
+    .product-item:hover {
+        cursor: pointer;
+    }
 
 .product-name {
     flex-grow: 1;
