@@ -8,5 +8,6 @@ public interface IProductRepository
     Task<int> UpdateAsync(Product product);
     Task DeleteAsync(Guid id);
     Task<Product?> GetByIdAsync(Guid id);
-    Task<IEnumerable<Product>> ListAsync(int page = 1, int pageSize = 10);
+    Task<IEnumerable<Product>> ListAsync(int page = 1, int pageSize = 10, string? productCategory = null);
+    Task<int> CountAsync(string? productCategory = null);
 }

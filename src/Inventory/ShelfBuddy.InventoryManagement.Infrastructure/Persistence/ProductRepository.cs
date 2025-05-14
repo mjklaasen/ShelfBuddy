@@ -46,13 +46,30 @@ public class ProductRepository(InventoryDbContext dbContext) : IProductRepositor
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<IEnumerable<Product>> ListAsync(int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<Product>> ListAsync(int page = 1, int pageSize = 10, string? productCategory = null)
     {
-        return await _dbContext.Products
-            .Include(x => x.ProductCategory)
+        var products = _dbContext.Products
+            .Include(x => x.ProductCategory).AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(productCategory))
+        {
+            products = products.Where(x => x.ProductCategory.Name.Equals(productCategory));
+        }
+
+        return await products
             .OrderBy(x => x.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+    }
+
+    public async Task<int> CountAsync(string? productCategory = null)
+    {
+        var products = _dbContext.Products.AsQueryable();
+        if (!string.IsNullOrWhiteSpace(productCategory))
+        {
+            products = products.Where(x => x.ProductCategory.Name.Equals(productCategory));
+        }
+        return await products.CountAsync();
     }
 }

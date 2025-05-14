@@ -54,4 +54,15 @@ public class InventoryRepository(InventoryDbContext dbContext) : IInventoryRepos
             .Take(pageSize)
             .ToListAsync();
     }
+
+    public async Task<int> CountAsync(Guid? userId = null)
+    {
+        if (userId is null)
+        {
+            return await _dbContext.Inventories.CountAsync();
+        }
+
+        return await _dbContext.Inventories
+            .CountAsync(inventory => inventory.UserId == userId);
+    }
 }

@@ -60,8 +60,7 @@ public static class EndpointExtensions
                 {
                     var listInventoriesResult = await inventoryRepository.ListAsync(page, pageSize, userId);
                     var inventories = listInventoriesResult as List<Inventory> ?? listInventoriesResult.ToList();
-                    context.Response.Headers.Append("X-Total-Count", inventories.Count.ToString());
-
+                    context.Response.Headers.Append("X-Total-Count", (await inventoryRepository.CountAsync()).ToString());
                     return Results.Ok(inventories.Select(x =>
                         new InventoryDto(x.Id, x.Name, x.UserId, x.Products.ToDictionary())));
                 })
@@ -118,13 +117,14 @@ public static class EndpointExtensions
             .WithName("GetProduct");
 
         group.MapGet("/", async (HttpContext context, [FromServices] IProductRepository productRepository,
-                [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+                [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? productCategory = null) =>
             {
-                var listProductsResult = await productRepository.ListAsync(page, pageSize);
+                var listProductsResult = await productRepository.ListAsync(page, pageSize, productCategory);
                 var products = listProductsResult as List<Product> ?? listProductsResult.ToList();
-                context.Response.Headers.Append("X-Total-Count", products.Count.ToString());
+                context.Response.Headers.Append("X-Total-Count", (await productRepository.CountAsync()).ToString());
                 return Results.Ok(products.Select(x =>
-                    new ProductDto(x.Id, x.Name, new ProductCategoryDto(x.ProductCategory.Id, x.ProductCategory.Name))));
+                    new ProductDto(x.Id, x.Name,
+                        new ProductCategoryDto(x.ProductCategory.Id, x.ProductCategory.Name))));
             })
             .WithName("ListProducts");
 
