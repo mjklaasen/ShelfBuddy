@@ -1,0 +1,26 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@using ShelfBuddy.ClientInterface.Services
+@inherits ErrorBoundary
+
+@inject NavigationManager NavigationManager
+@inject ErrorHandlingService ErrorService
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    //[Parameter]
+    //public RenderFragment? ChildContent { get; set; }
+
+    protected override Task OnErrorAsync(Exception exception)
+    {
+        ErrorService.ReportError(exception, "UI Render Error");
+
+        // Log the error to console for debugging
+        Console.WriteLine($"Error caught by ErrorBoundary: {exception.Message}");
+        Console.WriteLine($"Stack trace: {exception.StackTrace}");
+
+        return Task.CompletedTask;
+    }
+}

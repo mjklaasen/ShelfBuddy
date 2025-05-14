@@ -10,17 +10,24 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
     private readonly IPreferences _preferences = preferences;
     public List<InventoryDto> UserInventories { get; private set; } = [];
     public event Action? OnInventoryChanged;
+    public event Action? OnInventoryListChanged;
     public event Func<Task>? InventoryPageRefreshRequested;
     public InventoryDto? CurrentInventory { get; private set; }
     public bool HasActiveInventory => CurrentInventory is not null;
+    public bool IsError { get; private set; }
+    public bool IsInitialized { get; private set; }
+    public bool IsLoading { get; private set; }
 
     public async Task InitializeAsync(Guid userId)
     {
+        IsInitialized = false;
+        IsLoading = true;
         var lastInventoryId = Guid.Parse(_preferences.Get("CurrentInventoryId", Guid.Empty.ToString()));
         if (lastInventoryId != Guid.Empty)
         {
             await SetCurrentInventoryAsync(lastInventoryId);
             await LoadUserInventoriesAsync(userId);
+            IsInitialized = true;
             return;
         }
 
@@ -29,6 +36,8 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
         {
             await SetCurrentInventoryAsync(UserInventories[0].Id);
         }
+        IsInitialized = true;
+        IsLoading = false;
     }
 
     public async Task SetCurrentInventoryAsync(Guid? inventoryId)
@@ -58,6 +67,7 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
             if (response.IsSuccessStatusCode)
             {
                 CurrentInventory = await response.Content.ReadFromJsonAsync<InventoryDto>();
+                IsError = false;
                 OnInventoryChanged?.Invoke();
                 _preferences.Set("CurrentInventoryId", inventoryId.Value.ToString());
             }
@@ -99,11 +109,16 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
             if (response.IsSuccessStatusCode)
             {
                 UserInventories = await response.Content.ReadFromJsonAsync<List<InventoryDto>>() ?? [];
+                IsError = false;
             }
+
+            OnInventoryListChanged?.Invoke();
         }
         catch
         {
-            // Handle errors
+            UserInventories = [];
+            IsError = true;
+            OnInventoryListChanged?.Invoke();
         }
     }
 
@@ -122,11 +137,16 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
                 {
                     await SetCurrentInventoryAsync(CurrentInventory.Id);
                 }
+
+                IsError = false;
+                OnInventoryListChanged?.Invoke();
             }
         }
         catch
         {
-            // Handle errors - optionally log them
+            UserInventories = [];
+            IsError = true;
+            OnInventoryListChanged?.Invoke();
         }
     }
 

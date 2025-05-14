@@ -3,55 +3,60 @@
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
 @inject IInventoryStateService InventoryStateService
+@inject ErrorHandlingService ErrorHandlingService
 @inherits LayoutComponentBase
 
-<div class="app-shell">
-    <main>
-        <div class="status-bar">
-            <div class="app-title">
-                <button class="menu-toggle" @onclick="ToggleMenu">
-                    <i class="bi bi-list"></i>
-                </button>
-                <span>ShelfBuddy</span>
-            </div>
-            @if (_isAuthenticated)
-            {
-                <div class="inventory-context">
-                    <InventorySwitcher />
+<AppErrorBoundary>
+    <div class="app-shell">
+        <main>
+            <div class="status-bar">
+                <div class="app-title">
+                    <button class="menu-toggle" @onclick="ToggleMenu">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <span>ShelfBuddy</span>
                 </div>
-            }
-            <div class="user-section">
                 @if (_isAuthenticated)
                 {
-                    <button class="icon-button" @onclick="LogoutAsync">
-                        <i class="bi bi-box-arrow-right"></i>
-                    </button>
+                    <div class="inventory-context">
+                        <InventorySwitcher />
+                    </div>
                 }
+                <div class="user-section">
+                    @if (_isAuthenticated)
+                    {
+                        <button class="icon-button" @onclick="LogoutAsync">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="content-container">
+                @Body
+            </div>
+        </main>
+
+        <div class="side-menu @(_navMenu.IsOpen ? "menu-open" : "")">
+            <div class="menu-header">
+                <span>Menu</span>
+                <button class="menu-close" @onclick="ToggleMenu">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="menu-items">
+                <NavMenu @ref="_navMenu" />
             </div>
         </div>
 
-        <div class="content-container">
-            @Body
-        </div>
-    </main>
-
-    <div class="side-menu @(_navMenu.IsOpen ? "menu-open" : "")">
-        <div class="menu-header">
-            <span>Menu</span>
-            <button class="menu-close" @onclick="ToggleMenu">
-                <i class="bi bi-x-lg"></i>
-            </button>
-        </div>
-        <div class="menu-items">
-            <NavMenu @ref="_navMenu" />
-        </div>
+        @if (_navMenu.IsOpen)
+        {
+            <div class="menu-overlay" @onclick="ToggleMenu"></div>
+        }
     </div>
 
-    @if (_navMenu.IsOpen)
-    {
-        <div class="menu-overlay" @onclick="ToggleMenu"></div>
-    }
-</div>
+    <ErrorToast />
+</AppErrorBoundary>
 
 @code {
     private bool _isAuthenticated;
@@ -61,7 +66,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await CheckAuthStatusAsync();
+        try
+        {
+            await CheckAuthStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorHandlingService.ReportError(ex, "Error initializing main layout");
+            Console.WriteLine($"Error in OnInitializedAsync: {ex.Message}");
+        }
     }
 
     private void ToggleMenu()
@@ -72,32 +85,42 @@
 
     private async Task CheckAuthStatusAsync()
     {
-        _isAuthenticated = await UserService.IsAuthenticatedAsync();
-        if (_isAuthenticated)
+        try
         {
-            var user = await UserService.GetCurrentUserAsync();
-            _username = user?.Username ?? "";
-            _userId = user?.Id;
-
-            if (_userId.HasValue && !InventoryStateService.HasActiveInventory)
+            _isAuthenticated = await UserService.IsAuthenticatedAsync();
+            if (_isAuthenticated)
             {
-                await InventoryStateService.LoadDefaultInventoryAsync(_userId.Value);
+                var user = await UserService.GetCurrentUserAsync();
+                _username = user?.Username ?? "";
+                _userId = user?.Id;
+
+                if (_userId.HasValue && !InventoryStateService.HasActiveInventory)
+                {
+                    await InventoryStateService.LoadDefaultInventoryAsync(_userId.Value);
+                }
             }
+            StateHasChanged();
         }
-        StateHasChanged();
+        catch (Exception ex)
+        {
+            ErrorHandlingService.ReportError(ex, "Error checking authentication status");
+            Console.WriteLine($"Error in CheckAuthStatusAsync: {ex.Message}");
+        }
     }
 
     private async Task LogoutAsync()
     {
-        await InventoryStateService.SetCurrentInventoryAsync(null);
-
-        await UserService.LogoutAsync();
-        await CheckAuthStatusAsync();
-        NavigationManager.NavigateTo("/login");
-    }
-
-    private void NavigateToLogin()
-    {
-        NavigationManager.NavigateTo("/login");
+        try
+        {
+            await InventoryStateService.SetCurrentInventoryAsync(null);
+            await UserService.LogoutAsync();
+            await CheckAuthStatusAsync();
+            NavigationManager.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            ErrorHandlingService.ReportError(ex, "Error during logout");
+            Console.WriteLine($"Error in LogoutAsync: {ex.Message}");
+        }
     }
 }

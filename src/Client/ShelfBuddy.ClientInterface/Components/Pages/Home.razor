@@ -50,13 +50,15 @@
             _isLoading = false;
         }
 
-        if (InventoryStateService.HasActiveInventory && 
-            InventoryStateService.CurrentInventory?.Id is not null)
-        {
-            NavigationManager.NavigateTo($"/inventory/{InventoryStateService.CurrentInventory.Id}");
-            return;
-        }
+        NavigationManager.NavigateTo("/inventory/current");
+
+        // if (InventoryStateService.HasActiveInventory && 
+        //     InventoryStateService.CurrentInventory?.Id is not null)
+        // {
+        //     NavigationManager.NavigateTo($"/inventory/{InventoryStateService.CurrentInventory.Id}");
+        //     return;
+        // }
         
-        NavigationManager.NavigateTo("/inventories");
+        // NavigationManager.NavigateTo("/inventories");
     }
 }

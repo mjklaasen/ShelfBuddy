@@ -60,6 +60,21 @@ html, body {
     overflow-x: hidden;
 }
 
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+    .loading-container .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 1rem;
+    }
+
 /* Form elements */
 .form-group {
     margin-bottom: 1.5rem;
@@ -281,9 +296,15 @@ html, body {
     color: var(--text-light);
 }
 
-    .empty-state i {
+    .empty-state .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .empty-state .btn i {
         font-size: 3rem;
-        margin-bottom: 1rem;
         opacity: 0.5;
     }
 
