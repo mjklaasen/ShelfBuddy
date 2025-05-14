@@ -50,6 +50,7 @@ public class ProductRepository(InventoryDbContext dbContext) : IProductRepositor
     {
         return await _dbContext.Products
             .Include(x => x.ProductCategory)
+            .OrderBy(x => x.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

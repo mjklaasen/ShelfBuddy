@@ -41,6 +41,7 @@ public class InventoryRepository(InventoryDbContext dbContext) : IInventoryRepos
         if (userId is null)
         {
             return await _dbContext.Inventories
+                .OrderBy(x => x.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -48,6 +49,7 @@ public class InventoryRepository(InventoryDbContext dbContext) : IInventoryRepos
 
         return await _dbContext.Inventories
             .Where(inventory => inventory.UserId == userId)
+            .OrderBy(x => x.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
