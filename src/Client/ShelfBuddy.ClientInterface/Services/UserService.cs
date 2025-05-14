@@ -17,7 +17,7 @@ public class UserService(IHttpClientFactory httpClientFactory) : IUserService
         var client = _httpClientFactory.CreateClient("api");
         try
         {
-            _currentUser = await client.GetFromJsonAsync<UserInfo>("/user/current");
+            _currentUser = await client.GetFromJsonAsync<UserInfo>("/api/v1/user/current");
             return _currentUser;
         }
         catch
@@ -37,7 +37,7 @@ public class UserService(IHttpClientFactory httpClientFactory) : IUserService
         var client = _httpClientFactory.CreateClient("api");
 
         var loginRequest = new { Username = username, Password = password };
-        var response = await client.PostAsJsonAsync("/auth/login", loginRequest);
+        var response = await client.PostAsJsonAsync("/api/v1/auth/login", loginRequest);
 
         if (response.IsSuccessStatusCode)
         {

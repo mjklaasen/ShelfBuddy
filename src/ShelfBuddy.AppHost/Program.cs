@@ -19,6 +19,7 @@ var db = dbServer.AddDatabase("ShelfBuddyDb", "ShelfBuddy");
 builder
     .AddProject<Projects.ShelfBuddy_API>("ShelfBuddy-API")
     .WaitFor(dbServer)
-    .WithReference(db);
+    .WithReference(db)
+    .WithExternalHttpEndpoints();
 
 builder.Build().Run();

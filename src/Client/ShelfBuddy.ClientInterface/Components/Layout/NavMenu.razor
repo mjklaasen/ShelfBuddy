@@ -1,35 +1,82 @@
-﻿<div class="side-nav">
+﻿@using ShelfBuddy.ClientInterface.Services
+@inject IUserService UserService
+
+<div class="side-nav">
     <NavLink class="side-nav-item" href="" Match="NavLinkMatch.All" @onclick="CloseMenu">
         <i class="bi bi-house-door"></i>
         <span>Home</span>
     </NavLink>
-    
+
     <NavLink class="side-nav-item" href="inventories" @onclick="CloseMenu">
         <i class="bi bi-box-seam"></i>
         <span>Inventory</span>
     </NavLink>
-    
+
     <NavLink class="side-nav-item" href="scan" @onclick="CloseMenu">
         <i class="bi bi-upc-scan"></i>
         <span>Scan</span>
     </NavLink>
-    
+
     <NavLink class="side-nav-item" href="reports" @onclick="CloseMenu">
         <i class="bi bi-bar-chart"></i>
         <span>Reports</span>
     </NavLink>
-    
-    <NavLink class="side-nav-item" href="profile" @onclick="CloseMenu">
-        <i class="bi bi-person"></i>
-        <span>Profile</span>
-    </NavLink>
+
+    @if (_isAuthenticated)
+    {
+        <div class="side-nav-footer">
+            <NavLink class="side-nav-item" href="profile" @onclick="CloseMenu">
+                <i class="bi bi-person-circle"></i>
+                <span>@_username</span>
+            </NavLink>
+            <NavLink class="side-nav-item" href="login" @onclick="LogoutAsync">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </NavLink>
+        </div>
+    }
 </div>
 
 @code {
     public bool IsOpen { get; set; }
+    private bool _isAuthenticated;
+    private string _username = "";
+
+    [Parameter]
+    public EventCallback OnLogout { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CheckAuthStatusAsync();
+    }
 
     private void CloseMenu()
     {
         IsOpen = false;
+    }
+
+    private async Task CheckAuthStatusAsync()
+    {
+        try
+        {
+            _isAuthenticated = await UserService.IsAuthenticatedAsync();
+            if (_isAuthenticated)
+            {
+                var user = await UserService.GetCurrentUserAsync();
+                _username = user?.Username ?? "";
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error checking auth status in NavMenu: {ex.Message}");
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        CloseMenu();
+        await OnLogout.InvokeAsync();
+        _isAuthenticated = await UserService.IsAuthenticatedAsync();
     }
 }

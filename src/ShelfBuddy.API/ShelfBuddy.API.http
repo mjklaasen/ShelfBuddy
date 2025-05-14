@@ -5,7 +5,7 @@ Accept: application/json
 
 ###
 
-POST {{ShelfBuddy.API_HostAddress}}/inventory/
+POST {{ShelfBuddy.API_HostAddress}}/api/v1/inventories/
 Accept: application/json
 Content-Type: application/json
 
@@ -16,22 +16,22 @@ Content-Type: application/json
 
 ###
 
-GET {{ShelfBuddy.API_HostAddress}}/inventory/
+GET {{ShelfBuddy.API_HostAddress}}/api/v1/inventories/
 Accept: application/json
 
 ###
 
-GET {{ShelfBuddy.API_HostAddress}}/inventory?userId=F6557C1E-53B6-4306-8611-D8DE40DBADE9
+GET {{ShelfBuddy.API_HostAddress}}/inventories?userId=F6557C1E-53B6-4306-8611-D8DE40DBADE9
 Accept: application/json
 
 ###
 
-GET {{ShelfBuddy.API_HostAddress}}/inventory/01968b6f-8bed-7d4e-aa7d-1d4e8c4d4e29
+GET {{ShelfBuddy.API_HostAddress}}/api/v1/inventories/01968b6f-8bed-7d4e-aa7d-1d4e8c4d4e29
 Accept: application/json
 
 ###
 
-PUT {{ShelfBuddy.API_HostAddress}}/inventory/01968b69-8845-75de-8fe6-6f6c32813c8f
+PUT {{ShelfBuddy.API_HostAddress}}/api/v1/inventories/01968b69-8845-75de-8fe6-6f6c32813c8f
 Accept: application/json
 Content-Type: application/json
 {
@@ -45,12 +45,12 @@ Content-Type: application/json
 ###
 
 
-DELETE {{ShelfBuddy.API_HostAddress}}/inventory/01968b7c-3158-7d12-bd21-3cd61a0a9035
+DELETE {{ShelfBuddy.API_HostAddress}}/api/v1/inventories/01968b7c-3158-7d12-bd21-3cd61a0a9035
 Accept: application/json
 
 ###
 
-POST {{ShelfBuddy.API_HostAddress}}/product/
+POST {{ShelfBuddy.API_HostAddress}}/api/v1/products/
 Accept: application/json
 Content-Type: application/json
 
@@ -61,12 +61,12 @@ Content-Type: application/json
 
 ###
 
-GET {{ShelfBuddy.API_HostAddress}}/product/01968c24-01f3-7a8e-9cd1-d75b042d9654
+GET {{ShelfBuddy.API_HostAddress}}/api/v1/products/01968c24-01f3-7a8e-9cd1-d75b042d9654
 Accept: application/json
 
 ###
 
-PUT {{ShelfBuddy.API_HostAddress}}/product/01968c24-01f3-7a8e-9cd1-d75b042d9654
+PUT {{ShelfBuddy.API_HostAddress}}/api/v1/products/01968c24-01f3-7a8e-9cd1-d75b042d9654
 Accept: application/json
 Content-Type: application/json
 {
@@ -78,7 +78,7 @@ Content-Type: application/json
 
 ###
 
-GET {{ShelfBuddy.API_HostAddress}}/product
+GET {{ShelfBuddy.API_HostAddress}}/api/v1/products
 Accept: application/json
 
 ###

@@ -55,7 +55,9 @@ namespace ShelfBuddy.ClientInterface
                 .AddSingleton<IUserService>(sp => new MockUserService(sp.GetRequiredService<IPreferences>()))
                 .AddScoped<IInventoryStateService, InventoryStateService>()
                 .AddSingleton<ErrorHandlingService>()
-                .AddTransient<HttpExceptionHandler>();
+                .AddTransient<HttpExceptionHandler>()
+                .AddScoped<IInventoryService, InventoryService>()
+                .AddScoped<IProductService, ProductService>();
 
             return builder.Build();
         }

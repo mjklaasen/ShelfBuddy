@@ -1,12 +1,11 @@
-﻿using ShelfBuddy.Contracts;
-using System.Net.Http.Json;
-using ErrorOr;
+﻿using ErrorOr;
+using ShelfBuddy.Contracts;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public class InventoryStateService(IHttpClientFactory httpClientFactory, IPreferences preferences) : IInventoryStateService
+public class InventoryStateService(IInventoryService inventoryService, IPreferences preferences) : IInventoryStateService
 {
-    private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
+    private readonly IInventoryService _inventoryService = inventoryService;
     private readonly IPreferences _preferences = preferences;
     public List<InventoryDto> UserInventories { get; private set; } = [];
     public event Action? OnInventoryChanged;
@@ -61,16 +60,17 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
 
         try
         {
-            var client = _httpClientFactory.CreateClient("api");
-            var response = await client.GetAsync(new Uri($"/inventory/{inventoryId}", UriKind.Relative));
-
-            if (response.IsSuccessStatusCode)
+            var inv = await _inventoryService.GetAsync(inventoryId.Value);
+            if (!inv.IsError)
             {
-                CurrentInventory = await response.Content.ReadFromJsonAsync<InventoryDto>();
+                CurrentInventory = inv.Value;
                 IsError = false;
                 OnInventoryChanged?.Invoke();
                 _preferences.Set("CurrentInventoryId", inventoryId.Value.ToString());
             }
+
+            CurrentInventory = null;
+            OnInventoryChanged?.Invoke();
         }
         catch
         {
@@ -103,12 +103,11 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("api");
-            var response = await client.GetAsync(new Uri($"/inventory?userId={userId}", UriKind.Relative));
+            var inventories = await _inventoryService.ListAsync(userId);
 
-            if (response.IsSuccessStatusCode)
+            if (inventories.Count > 0)
             {
-                UserInventories = await response.Content.ReadFromJsonAsync<List<InventoryDto>>() ?? [];
+                UserInventories = inventories;
                 IsError = false;
             }
 
@@ -126,13 +125,11 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("api");
-            var response = await client.GetAsync(new Uri($"/inventory?userId={userId}", UriKind.Relative));
+            var inventories = await _inventoryService.ListAsync(userId);
 
-            if (response.IsSuccessStatusCode)
+            if (inventories.Count > 0)
             {
-                UserInventories = await response.Content.ReadFromJsonAsync<List<InventoryDto>>() ?? [];
-                
+                UserInventories = inventories;
                 if (CurrentInventory is not null)
                 {
                     await SetCurrentInventoryAsync(CurrentInventory.Id);
@@ -154,11 +151,10 @@ public class InventoryStateService(IHttpClientFactory httpClientFactory, IPrefer
     {
         try
         {
-            var client = _httpClientFactory.CreateClient("api");
-            var response = await client.DeleteAsync(new Uri($"/inventory/{inventoryId}", UriKind.Relative));
-            if (!response.IsSuccessStatusCode)
+            var deleteInventoryResponse = await _inventoryService.DeleteAsync(inventoryId);
+            if (deleteInventoryResponse.IsError)
             {
-                return Error.Failure(code: "InventoryStateService.DeleteInventoryFailure", description: response.ReasonPhrase ?? "Failure to delete inventory.");
+                return deleteInventoryResponse;
             }
 
             if (CurrentInventory?.Id != inventoryId)

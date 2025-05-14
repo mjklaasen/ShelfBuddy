@@ -22,14 +22,6 @@
                         <InventorySwitcher />
                     </div>
                 }
-                <div class="user-section">
-                    @if (_isAuthenticated)
-                    {
-                        <button class="icon-button" @onclick="LogoutAsync">
-                            <i class="bi bi-box-arrow-right"></i>
-                        </button>
-                    }
-                </div>
             </div>
 
             <div class="content-container">
@@ -45,7 +37,7 @@
                 </button>
             </div>
             <div class="menu-items">
-                <NavMenu @ref="_navMenu" />
+                <NavMenu @ref="_navMenu" OnLogout="LogoutAsync" />
             </div>
         </div>
 
@@ -60,7 +52,6 @@
 
 @code {
     private bool _isAuthenticated;
-    private string _username = "";
     private Guid? _userId;
     private NavMenu _navMenu = new();
 
@@ -91,7 +82,6 @@
             if (_isAuthenticated)
             {
                 var user = await UserService.GetCurrentUserAsync();
-                _username = user?.Username ?? "";
                 _userId = user?.Id;
 
                 if (_userId.HasValue && !InventoryStateService.HasActiveInventory)
@@ -115,7 +105,6 @@
             await InventoryStateService.SetCurrentInventoryAsync(null);
             await UserService.LogoutAsync();
             await CheckAuthStatusAsync();
-            NavigationManager.NavigateTo("/login");
         }
         catch (Exception ex)
         {
