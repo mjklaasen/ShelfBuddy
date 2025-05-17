@@ -60,6 +60,10 @@ html, body {
     overflow-x: hidden;
 }
 
+h1 {
+    padding-bottom: 2rem;
+}
+
 .loading-container {
     display: flex;
     flex-direction: column;

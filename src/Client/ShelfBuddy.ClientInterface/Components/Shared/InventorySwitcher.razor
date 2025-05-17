@@ -1,9 +1,9 @@
-﻿@using System.Diagnostics
-@using ShelfBuddy.ClientInterface.Services
+﻿@using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 @inject IInventoryStateService InventoryStateService
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime
 @implements IDisposable
 
 <div class="inventory-switcher">
@@ -27,12 +27,12 @@
     {
         <div class="dropdown">
             <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button"
-            @onclick="() => _isOpen = !_isOpen">
+            @onclick:stopPropagation="true" @onclick="ToggleDropdown">
                 <i class="bi bi-box"></i> @InventoryStateService.CurrentInventory.Name
             </button>
             @if (_isOpen)
             {
-                <div class="dropdown-menu show" style="position: absolute; z-index: 1000;">
+                <div class="dropdown-menu show" @onclick:stopPropagation="true">
                     <h6 class="dropdown-header">Your Inventories</h6>
                     @foreach (var inventory in _inventories)
                     {
@@ -59,6 +59,9 @@
     private bool _isLoading = true;
     private bool _isOpen;
     private bool IsError => InventoryStateService.IsError;
+    private DotNetObjectReference<InventorySwitcher>? _dotNetObjectReference;
+    private bool _jsInitialized;
+
     protected override async Task OnInitializedAsync()
     {
         InventoryStateService.OnInventoryChanged += OnInventoryChanged;
@@ -80,6 +83,36 @@
             await Task.Delay(100);
         }
         _isLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _jsInitialized)
+        {
+            return;
+        }
+
+        try
+        {
+            _dotNetObjectReference = DotNetObjectReference.Create(this);
+
+            // Initialize our click outside handler using the JavaScript namespace
+            var success = await JsRuntime.InvokeAsync<bool>(
+                "inventorySwitcher.initialize",
+                _dotNetObjectReference
+            );
+
+            _jsInitialized = success;
+
+            if (!success)
+            {
+                Console.WriteLine("Failed to initialize inventory switcher JavaScript");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error initializing JS interop: {ex.Message}");
+        }
     }
 
     private void OnInventoryChanged()
@@ -140,10 +173,44 @@
 
         NavigationManager.NavigateTo($"/inventory/{inventoryId}");
     }
-    
-    public void Dispose()
+
+    private void ToggleDropdown()
     {
-        InventoryStateService.OnInventoryChanged -= OnInventoryChanged;
-        InventoryStateService.OnInventoryListChanged -= OnInventoryChanged;
+        _isOpen = !_isOpen;
+        StateHasChanged();
+    }
+    
+    [JSInvokable]
+    public void HandleClickOutside()
+    {
+        if (!_isOpen)
+        {
+            return;
+        }
+
+        _isOpen = false;
+        StateHasChanged();
+    }
+    
+    public async void Dispose()
+    {
+        try
+        {
+            InventoryStateService.OnInventoryChanged -= OnInventoryChanged;
+            InventoryStateService.OnInventoryListChanged -= OnInventoryChanged;
+
+            if (_dotNetObjectReference is null || !_jsInitialized)
+            {
+                return;
+            }
+
+            // Clean up JavaScript resources
+            await JsRuntime.InvokeAsync<bool>("inventorySwitcher.dispose");
+            _dotNetObjectReference.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error disposing InventorySwitcher: {ex.Message}");
+        }
     }
 }

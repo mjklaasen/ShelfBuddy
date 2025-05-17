@@ -18,11 +18,29 @@
     justify-content: center;
 }
 
+.inventory-switcher {
+    position: relative;
+}
+
 .inventory-switcher .dropdown-menu {
     min-width: 200px;
+    position: absolute;
+    z-index: 1000;
+    right: 0;
+    left: auto;
+    transform-origin: top right;
+    margin-top: 0.5rem;
+    max-width: 100vw;
 }
 
 .inventory-switcher .dropdown-item.active {
     background-color: var(--bs-primary);
     color: white;
+}
+
+@media (max-width: 576px) {
+    .inventory-switcher .dropdown-menu {
+        min-width: 180px;
+        max-width: 90vw;
+    }
 }
