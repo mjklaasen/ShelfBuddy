@@ -14,5 +14,11 @@ public class ProductCategoryConfiguration : IEntityTypeConfiguration<ProductCate
         builder.Property(productCategory => productCategory.Name)
             .IsRequired()
             .HasMaxLength(100);
+
+        builder.Property<DateTimeOffset>("CreatedAt")
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property<DateTimeOffset>("UpdatedAt")
+            .HasDefaultValueSql("GETUTCDATE()");
     }
 }

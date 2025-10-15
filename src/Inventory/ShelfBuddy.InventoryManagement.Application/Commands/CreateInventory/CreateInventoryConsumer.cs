@@ -21,6 +21,6 @@ public class CreateInventoryConsumer(IInventoryRepository inventoryRepository) :
             return;
         }
 
-        await context.RespondAsync(new InventoryCreated(inventory.Id));
+        await context.RespondAsync(new InventoryCreated(inventory.Id, _inventoryRepository.GetLastUpdated(inventory)));
     }
 }

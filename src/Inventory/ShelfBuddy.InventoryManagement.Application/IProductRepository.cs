@@ -10,4 +10,5 @@ public interface IProductRepository
     Task<Product?> GetByIdAsync(Guid id);
     Task<IEnumerable<Product>> ListAsync(int page = 1, int pageSize = 10, string? productCategory = null);
     Task<int> CountAsync(string? productCategory = null);
+    DateTimeOffset GetLastUpdated(Product product);
 }

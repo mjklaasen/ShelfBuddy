@@ -18,5 +18,11 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.HasOne(product => product.ProductCategory)
             .WithMany()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property<DateTimeOffset>("CreatedAt")
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property<DateTimeOffset>("UpdatedAt")
+            .HasDefaultValueSql("GETUTCDATE()");
     }
 }

@@ -22,7 +22,7 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
             .HasMaxLength(100);
 
         builder.Property(inventory => inventory.UserId);
-        builder.Property(typeof(Dictionary<Guid, int>), "_products").HasConversion(
+        builder.Property<Dictionary<Guid, int>>("_products").HasConversion(
                 new ValueConverter<Dictionary<Guid, int>, string>(
                     x => JsonSerializer.Serialize(x, JsonSerializerOptions),
                     x => JsonSerializer.Deserialize<Dictionary<Guid, int>>(x, JsonSerializerOptions) ??
@@ -30,5 +30,11 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
             .HasColumnName("Products")
             .HasDefaultValue(new Dictionary<Guid, int>());
         builder.Ignore(inventory => inventory.Products);
+
+        builder.Property<DateTimeOffset>("CreatedAt")
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property<DateTimeOffset>("UpdatedAt")
+            .HasDefaultValueSql("GETUTCDATE()");
     }
 }

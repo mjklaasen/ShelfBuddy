@@ -1,3 +1,3 @@
 ﻿namespace ShelfBuddy.Contracts;
 
-public record ProductDto(Guid? Id, string Name, ProductCategoryDto ProductCategory);
+public record ProductDto(Guid? Id, string Name, ProductCategoryDto ProductCategory, DateTimeOffset LastUpdated);

@@ -5,9 +5,12 @@ using ShelfBuddy.InventoryManagement.Domain;
 
 namespace ShelfBuddy.InventoryManagement.Application;
 
-public class CreateProductConsumer(IProductRepository productRepository) : IConsumer<CreateProduct>
+public class CreateProductConsumer(
+    IProductRepository productRepository,
+    IProductCategoryRepository productCategoryRepository) : IConsumer<CreateProduct>
 {
     private readonly IProductRepository _productRepository = productRepository;
+    private readonly IProductCategoryRepository _productCategoryRepository = productCategoryRepository;
 
     public async Task Consume(ConsumeContext<CreateProduct> context)
     {
@@ -21,6 +24,8 @@ public class CreateProductConsumer(IProductRepository productRepository) : ICons
         }
 
         await context.RespondAsync(new ProductCreated(new ProductDto(product.Id, product.Name,
-            new ProductCategoryDto(product.ProductCategory.Id, product.ProductCategory.Name))));
+            new ProductCategoryDto(product.ProductCategory.Id, product.ProductCategory.Name,
+                _productCategoryRepository.GetLastUpdated(product.ProductCategory)),
+            _productRepository.GetLastUpdated(product))));
     }
 }

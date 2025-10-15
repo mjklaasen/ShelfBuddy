@@ -20,7 +20,8 @@ internal static class ProductCategoryEndpointExtensions
             var productCategory = await productCategoryRepository.GetByIdAsync(id);
             return productCategory is null
                 ? Results.NotFound()
-                : Results.Ok(new ProductCategoryDto(productCategory.Id, productCategory.Name));
+                : Results.Ok(new ProductCategoryDto(productCategory.Id, productCategory.Name,
+                    productCategoryRepository.GetLastUpdated(productCategory)));
         })
             .WithName("GetProductCategoryById");
 
@@ -29,7 +30,8 @@ internal static class ProductCategoryEndpointExtensions
             var productCategory = await productCategoryRepository.GetByNameAsync(name);
             return productCategory is null
                 ? Results.NotFound()
-                : Results.Ok(new ProductCategoryDto(productCategory.Id, productCategory.Name));
+                : Results.Ok(new ProductCategoryDto(productCategory.Id, productCategory.Name,
+                    productCategoryRepository.GetLastUpdated(productCategory)));
         })
             .WithName("GetProductCategoryByName");
 
@@ -40,7 +42,8 @@ internal static class ProductCategoryEndpointExtensions
             var productCategories = listProductCategoriesResult as List<ProductCategory> ??
                                     listProductCategoriesResult.ToList();
             context.Response.Headers.Append("X-Total-Count", (await productCategoryRepository.CountAsync()).ToString());
-            return Results.Ok(productCategories.Select(x => new ProductCategoryDto(x.Id, x.Name)));
+            return Results.Ok(productCategories.Select(x =>
+                new ProductCategoryDto(x.Id, x.Name, productCategoryRepository.GetLastUpdated(x))));
         })
             .WithName("ListProductCategories");
 

@@ -31,7 +31,9 @@ public class UpdateProductConsumer(IProductRepository productRepository, IProduc
         await _productRepository.UpdateAsync(product);
 
         await context.RespondAsync(new ProductUpdated(new ProductDto(product.Id, product.Name,
-            new ProductCategoryDto(product.ProductCategory.Id, product.ProductCategory.Name))));
+            new ProductCategoryDto(product.ProductCategory.Id, product.ProductCategory.Name,
+                _productCategoryRepository.GetLastUpdated(product.ProductCategory)),
+            _productRepository.GetLastUpdated(product))));
     }
 
     private async Task UpdateProductCategoryAsync(UpdateProduct message, Product product)

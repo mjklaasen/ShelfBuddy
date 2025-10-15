@@ -54,4 +54,10 @@ public class ProductCategoryRepository(InventoryDbContext dbContext) : IProductC
     {
         return await _dbContext.ProductCategories.CountAsync();
     }
+
+    public DateTimeOffset GetLastUpdated(ProductCategory productCategory)
+    {
+        var entry = _dbContext.Entry(productCategory);
+        return entry.Property<DateTimeOffset>("UpdatedAt").CurrentValue;
+    }
 }

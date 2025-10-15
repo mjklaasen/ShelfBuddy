@@ -65,4 +65,10 @@ public class InventoryRepository(InventoryDbContext dbContext) : IInventoryRepos
         return await _dbContext.Inventories
             .CountAsync(inventory => inventory.UserId == userId);
     }
+
+    public DateTimeOffset GetLastUpdated(Inventory inventory)
+    {
+        var entry = _dbContext.Entry(inventory);
+        return entry.Property<DateTimeOffset>("UpdatedAt").CurrentValue;
+    }
 }

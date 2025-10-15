@@ -1,5 +1,6 @@
 using ShelfBuddy.API;
 using ShelfBuddy.InventoryManagement.Application;
+using ShelfBuddy.InventoryManagement.Infrastructure;
 using ShelfBuddy.SharedKernel.Json;
 using System.Text.Json.Serialization;
 
@@ -13,6 +14,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 builder.Services.AddOpenApi(options => options.ShouldInclude += description => !string.IsNullOrEmpty(description.GroupName));
+
+builder.Services.AddHostedService<DatabaseInitializer>();
 
 var app = builder.Build();
 
