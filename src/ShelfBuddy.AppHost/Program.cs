@@ -9,7 +9,7 @@ if (builder.Environment.IsDevelopment())
     dbServer = dbServer.RunAsContainer(sqlContainer =>
     {
         sqlContainer
-            .WithDataVolume()
+            .WithDataVolume(name: "ShelfBuddy-SQL-data")
             .WithLifetime(ContainerLifetime.Persistent);
     });
 }
