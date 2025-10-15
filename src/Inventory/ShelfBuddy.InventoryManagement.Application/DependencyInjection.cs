@@ -1,4 +1,5 @@
 using MassTransit;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Hosting;
 
 namespace ShelfBuddy.InventoryManagement.Application;
@@ -14,5 +15,12 @@ public static class DependencyInjection
     {
         configurator.AddConsumersFromNamespaceContaining(typeof(DependencyInjection));
         return configurator;
+    }
+
+    public static IEndpointRouteBuilder MapInventoryManagementEndpoints(this IEndpointRouteBuilder app)
+    {
+        return app
+            .MapInventoryEndpoints()
+            .MapProductEndpoints();
     }
 }

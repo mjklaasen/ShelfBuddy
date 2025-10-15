@@ -9,16 +9,9 @@ using ShelfBuddy.InventoryManagement.Domain;
 
 namespace ShelfBuddy.InventoryManagement.Application;
 
-public static class EndpointExtensions
+public static class InventoryEndpointExtensions
 {
-    public static IEndpointRouteBuilder MapInventoryManagementEndpoints(this IEndpointRouteBuilder app)
-    {
-        return app
-            .MapInventoryEndpoints()
-            .MapProductEndpoints();
-    }
-
-    private static IEndpointRouteBuilder MapInventoryEndpoints(this IEndpointRouteBuilder app)
+    internal static IEndpointRouteBuilder MapInventoryEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("api/v1/inventories")
             .WithGroupName("Inventories")
