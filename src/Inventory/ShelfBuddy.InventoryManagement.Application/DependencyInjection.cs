@@ -21,6 +21,7 @@ public static class DependencyInjection
     {
         return app
             .MapInventoryEndpoints()
-            .MapProductEndpoints();
+            .MapProductEndpoints()
+            .MapProductCategoryEndpoints();
     }
 }

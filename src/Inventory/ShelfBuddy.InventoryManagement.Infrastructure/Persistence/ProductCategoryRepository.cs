@@ -49,4 +49,9 @@ public class ProductCategoryRepository(InventoryDbContext dbContext) : IProductC
             .Take(pageSize)
             .ToListAsync();
     }
+
+    public async Task<int> CountAsync()
+    {
+        return await _dbContext.ProductCategories.CountAsync();
+    }
 }

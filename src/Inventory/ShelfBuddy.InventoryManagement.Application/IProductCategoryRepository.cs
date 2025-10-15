@@ -10,4 +10,5 @@ public interface IProductCategoryRepository
     Task<ProductCategory?> GetByIdAsync(Guid id);
     Task<ProductCategory?> GetByNameAsync(string name);
     Task<IEnumerable<ProductCategory>> ListAsync(int page = 1, int pageSize = 10);
+    Task<int> CountAsync();
 }
