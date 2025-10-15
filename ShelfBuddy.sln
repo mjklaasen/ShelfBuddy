@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfBuddy.InventoryManagem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfBuddy.InventoryManagement.Infrastructure", "src\Inventory\ShelfBuddy.InventoryManagement.Infrastructure\ShelfBuddy.InventoryManagement.Infrastructure.csproj", "{05250AA7-26E4-4C11-93C5-7B4334788EF2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShelfBuddy.ClientInterface.LocalDb", "src\Client\ShelfBuddy.ClientInterface.LocalDb\ShelfBuddy.ClientInterface.LocalDb.csproj", "{C1D5FF7A-B6F9-4CCD-88F1-62669B9FB47F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +84,10 @@ Global
 		{05250AA7-26E4-4C11-93C5-7B4334788EF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05250AA7-26E4-4C11-93C5-7B4334788EF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05250AA7-26E4-4C11-93C5-7B4334788EF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1D5FF7A-B6F9-4CCD-88F1-62669B9FB47F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1D5FF7A-B6F9-4CCD-88F1-62669B9FB47F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1D5FF7A-B6F9-4CCD-88F1-62669B9FB47F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1D5FF7A-B6F9-4CCD-88F1-62669B9FB47F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +105,7 @@ Global
 		{86A00E00-E319-464D-BA4A-59815868D479} = {6646DC9B-45F7-597F-FD98-DC7F277572B1}
 		{CD393B2B-2B81-4030-88B9-D669AA370943} = {6646DC9B-45F7-597F-FD98-DC7F277572B1}
 		{05250AA7-26E4-4C11-93C5-7B4334788EF2} = {6646DC9B-45F7-597F-FD98-DC7F277572B1}
+		{C1D5FF7A-B6F9-4CCD-88F1-62669B9FB47F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {01F5CB3F-687F-4777-86B3-9C3F37CEF0BD}
