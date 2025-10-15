@@ -63,6 +63,7 @@ namespace ShelfBuddy.ClientInterface
                 .AddTransient<HttpExceptionHandler>()
                 .AddScoped<IInventoryService, InventoryService>()
                 .AddScoped<IProductService, ProductService>()
+                .AddScoped<IProductCategoryService, ProductCategoryService>()
                 .AddSingleton<IDatabaseInitializer, DatabaseInitializer>()
                 .AddScoped<ILocalInventoryRepository, LocalInventoryRepository>()
                 .AddScoped<ILocalProductRepository, LocalProductRepository>()
