@@ -61,7 +61,8 @@ namespace ShelfBuddy.ClientInterface
                 .AddSingleton<ErrorHandlingService>()
                 .AddTransient<HttpExceptionHandler>()
                 .AddScoped<IInventoryService, InventoryService>()
-                .AddScoped<IProductService, ProductService>();
+                .AddScoped<IProductService, ProductService>()
+                .AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
 
             var dbFileLocation = Path.Combine(FileSystem.AppDataDirectory, @"shelfbuddy.db");
             builder.Services.AddDbContext<LocalDbContext>(options =>

@@ -1,5 +1,5 @@
+using ShelfBuddy.ClientInterface.LocalDb;
 using ShelfBuddy.ClientInterface.Services;
-using Microsoft.Maui.ApplicationModel;
 
 namespace ShelfBuddy.ClientInterface
 {
@@ -15,6 +15,32 @@ namespace ShelfBuddy.ClientInterface
         protected override Window CreateWindow(IActivationState? activationState)
         {
             return new Window(new MainPage()) { Title = "ShelfBuddy.ClientInterface" };
+        }
+
+        protected override async void OnStart()
+        {
+            try
+            {
+                if (IPlatformApplication.Current is null)
+                {
+                    throw new InvalidOperationException(
+                        "IPlatformApplication.Current is null. Cannot initialize database.");
+                }
+
+                var databaseInitializer =
+                    IPlatformApplication.Current.Services.GetRequiredService<IDatabaseInitializer>();
+                await databaseInitializer.InitializeDatabaseAsync();
+            }
+
+            catch (Exception ex)
+            {
+                MainThread.BeginInvokeOnMainThread(() => {
+                    var errorService = IPlatformApplication.Current?.Services.GetService<ErrorHandlingService>();
+                    errorService?.ReportError(ex, "Application Exception");
+                });
+            }
+
+            base.OnStart();
         }
 
         private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
