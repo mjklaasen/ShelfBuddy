@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ShelfBuddy.ClientInterface.LocalDb;
 using ShelfBuddy.ClientInterface.Services;
 
 namespace ShelfBuddy.ClientInterface
@@ -60,6 +62,10 @@ namespace ShelfBuddy.ClientInterface
                 .AddTransient<HttpExceptionHandler>()
                 .AddScoped<IInventoryService, InventoryService>()
                 .AddScoped<IProductService, ProductService>();
+
+            var dbFileLocation = Path.Combine(FileSystem.AppDataDirectory, @"shelfbuddy.db");
+            builder.Services.AddDbContext<LocalDbContext>(options =>
+                options.UseSqlite($"Data Source={dbFileLocation}"));
 
             return builder.Build();
         }
