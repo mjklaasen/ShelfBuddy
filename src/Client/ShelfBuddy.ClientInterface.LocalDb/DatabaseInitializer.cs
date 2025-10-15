@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -11,8 +11,8 @@ public class DatabaseInitializer(LocalDbContext dbContext) : IDatabaseInitialize
 
     public async Task InitializeDatabaseAsync()
     {
-        var activitySource = new ActivitySource("Migrations");
-        using var activity = activitySource.StartActivity("Migrating database", ActivityKind.Client);
+        using var activitySource = new ActivitySource("Migrations");
+        using var activity = activitySource.StartActivity(nameof(DatabaseInitializer), ActivityKind.Client);
         try
         {
             await EnsureDatabaseAsync(_dbContext);

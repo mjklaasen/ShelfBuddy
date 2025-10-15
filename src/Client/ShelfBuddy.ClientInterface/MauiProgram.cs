@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ShelfBuddy.ClientInterface.LocalDb;
+using ShelfBuddy.ClientInterface.LocalDb.Repositories;
 using ShelfBuddy.ClientInterface.Services;
 
 namespace ShelfBuddy.ClientInterface
@@ -62,7 +63,10 @@ namespace ShelfBuddy.ClientInterface
                 .AddTransient<HttpExceptionHandler>()
                 .AddScoped<IInventoryService, InventoryService>()
                 .AddScoped<IProductService, ProductService>()
-                .AddSingleton<IDatabaseInitializer, DatabaseInitializer>();
+                .AddSingleton<IDatabaseInitializer, DatabaseInitializer>()
+                .AddScoped<ILocalInventoryRepository, LocalInventoryRepository>()
+                .AddScoped<ILocalProductRepository, LocalProductRepository>()
+                .AddScoped<ILocalProductCategoryRepository, LocalProductCategoryRepository>();
 
             var dbFileLocation = Path.Combine(FileSystem.AppDataDirectory, @"shelfbuddy.db");
             builder.Services.AddDbContext<LocalDbContext>(options =>
