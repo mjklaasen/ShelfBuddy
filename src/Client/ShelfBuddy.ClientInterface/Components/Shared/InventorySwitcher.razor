@@ -1,4 +1,4 @@
-﻿@using ShelfBuddy.ClientInterface.Services
+@using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 @inject IInventoryStateService InventoryStateService
 @inject IUserService UserService
@@ -55,7 +55,7 @@
 </div>
 
 @code {
-    private List<InventoryDto> _inventories = [];
+    private IList<InventoryDto> _inventories = [];
     private bool _isLoading = true;
     private bool _isOpen;
     private bool IsError => InventoryStateService.IsError;
@@ -117,7 +117,7 @@
         }
     }
 
-    private void OnInventoryChanged()
+    private void OnInventoryChanged(object? sender, EventArgs e)
     {
         _inventories = InventoryStateService.UserInventories;
         StateHasChanged();
@@ -169,7 +169,7 @@
 
         if (isOnDetailsPage)
         {
-            await InventoryStateService.NotifyInventoryPageRefreshRequestedAsync();
+            InventoryStateService.NotifyInventoryPageRefreshRequested();
             return;
         }
 

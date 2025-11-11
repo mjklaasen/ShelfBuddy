@@ -1,11 +1,11 @@
-﻿using ErrorOr;
+using ErrorOr;
 using Microsoft.AspNetCore.Http;
 
 namespace ShelfBuddy.API.Common;
 
 public static class CustomResults
 {
-    public static IResult Problem(List<Error> errors)
+    public static IResult Problem(IList<Error> errors)
     {
         if (errors.Count is 0)
         {
@@ -35,7 +35,7 @@ public static class CustomResults
         return Results.Problem(statusCode: statusCode, title: error.Code, detail: error.Description);
     }
 
-    private static IResult ValidationProblem(List<Error> errors)
+    private static IResult ValidationProblem(IList<Error> errors)
     {
         var modelStateDictionary = errors.GroupBy(error => error.Code).ToDictionary(grouping => grouping.Key,
             grouping => grouping.Select(error => error.Description).ToArray());

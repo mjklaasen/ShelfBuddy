@@ -1,9 +1,9 @@
-﻿namespace ShelfBuddy.ClientInterface.Services;
+namespace ShelfBuddy.ClientInterface.Services;
 
-public class ErrorHandlingService
+internal class ErrorHandlingService
 {
-    public event Action<Exception, string>? OnError;
-    public event Action? OnClearError;
+    public event EventHandler<ErrorEventArgs> OnError = (_, _) => { };
+    public event EventHandler OnClearError = (_, _) => { };
 
     public void ReportError(Exception ex, string? context = null)
     {
@@ -15,12 +15,12 @@ public class ErrorHandlingService
             // Unwrap aggregate exceptions
             foreach (var innerEx in aggregateEx.InnerExceptions)
             {
-                OnError?.Invoke(innerEx, context ?? "Multiple errors occurred");
+                OnError?.Invoke(this, new ErrorEventArgs(innerEx, context ?? "Multiple errors occurred"));
             }
         }
         else
         {
-            OnError?.Invoke(ex, context ?? "An error occurred");
+            OnError?.Invoke(this, new ErrorEventArgs(ex, context ?? "An error occurred"));
         }
     }
 
@@ -29,11 +29,11 @@ public class ErrorHandlingService
         Console.WriteLine($"ErrorHandlingService - Error message: {errorMessage}");
         Console.WriteLine($"Context: {context}");
 
-        OnError?.Invoke(new Exception(errorMessage), context ?? "An error occurred");
+        OnError?.Invoke(this, new ErrorEventArgs(new ApplicationErrorException(errorMessage), context ?? "An error occurred"));
     }
 
     public void ClearError()
     {
-        OnClearError?.Invoke();
+        OnClearError?.Invoke(this, EventArgs.Empty);
     }
 }

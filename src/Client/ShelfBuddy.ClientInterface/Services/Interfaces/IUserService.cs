@@ -1,6 +1,6 @@
-﻿namespace ShelfBuddy.ClientInterface.Services;
+namespace ShelfBuddy.ClientInterface.Services;
 
-public interface IUserService
+internal interface IUserService
 {
     Task<UserInfo?> GetCurrentUserAsync();
     Task<bool> IsAuthenticatedAsync();

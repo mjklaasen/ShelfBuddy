@@ -1,4 +1,4 @@
-﻿@using ShelfBuddy.ClientInterface.Services
+@using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 
 @if (_product is null)
@@ -15,7 +15,7 @@
     public int Quantity { get; set; }
 
     [Inject]
-    public IProductService ProductService { get; set; } = default!;
+    internal IProductService ProductService { get; set; } = default!;
 
     private ProductDto? _product;
 

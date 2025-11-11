@@ -1,10 +1,10 @@
-﻿using ErrorOr;
+using ErrorOr;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public abstract class EntityServiceBase
+internal abstract class EntityServiceBase
 {
     protected virtual async Task<List<Error>> GetHttpErrorsAsync(HttpResponseMessage response)
     {

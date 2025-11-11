@@ -1,16 +1,17 @@
-﻿using ErrorOr;
+using ErrorOr;
 using ShelfBuddy.Contracts;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public class InventoryStateService(IInventoryService inventoryService, IPreferences preferences) : IInventoryStateService
+internal class InventoryStateService(IInventoryService inventoryService, IPreferences preferences) : IInventoryStateService
 {
     private readonly IInventoryService _inventoryService = inventoryService;
     private readonly IPreferences _preferences = preferences;
-    public List<InventoryDto> UserInventories { get; private set; } = [];
-    public event Action? OnInventoryChanged;
-    public event Action? OnInventoryListChanged;
-    public event Func<Task>? InventoryPageRefreshRequested;
+    public IList<InventoryDto> UserInventories => _userInventories;
+    private List<InventoryDto> _userInventories = [];
+    public event EventHandler? OnInventoryChanged;
+    public event EventHandler? OnInventoryListChanged;
+    public event EventHandler? InventoryPageRefreshRequested;
     public InventoryDto? CurrentInventory { get; private set; }
     public bool HasActiveInventory => CurrentInventory is not null;
     public bool IsError { get; private set; }
@@ -33,9 +34,9 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
         }
 
         await LoadUserInventoriesAsync(userId);
-        if (UserInventories.Count > 0 && CurrentInventory is null)
+        if (_userInventories.Count > 0 && CurrentInventory is null)
         {
-            await SetCurrentInventoryAsync(UserInventories[0].Id);
+            await SetCurrentInventoryAsync(_userInventories[0].Id);
         }
         IsInitialized = true;
         IsLoading = false;
@@ -46,16 +47,16 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
         if (inventoryId is null)
         {
             CurrentInventory = null;
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(this, EventArgs.Empty);
             _preferences.Remove("CurrentInventoryId");
             return;
         }
         
-        var inventory = UserInventories.FirstOrDefault(i => i.Id == inventoryId);
+        var inventory = _userInventories.FirstOrDefault(i => i.Id == inventoryId);
         if (inventory is not null)
         {
             CurrentInventory = inventory;
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(this, EventArgs.Empty);
             _preferences.Set("CurrentInventoryId", inventoryId.Value.ToString());
             return;
         }
@@ -67,19 +68,19 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
             {
                 CurrentInventory = inv.Value;
                 IsError = false;
-                OnInventoryChanged?.Invoke();
+                OnInventoryChanged?.Invoke(this, EventArgs.Empty);
                 _preferences.Set("CurrentInventoryId", inventoryId.Value.ToString());
                 return;
             }
 
             CurrentInventory = null;
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
             // Handle errors
             CurrentInventory = null;
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -89,16 +90,16 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
         {
             await LoadUserInventoriesAsync(userId);
 
-            if (UserInventories.Count > 0)
+            if (_userInventories.Count > 0)
             {
-                await SetCurrentInventoryAsync(UserInventories[0].Id);
+                await SetCurrentInventoryAsync(_userInventories[0].Id);
             }
         }
         catch
         {
             // Handle errors
             CurrentInventory = null;
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -110,17 +111,17 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
 
             if (inventories.Count > 0)
             {
-                UserInventories = inventories;
+                _userInventories = inventories;
                 IsError = false;
             }
 
-            OnInventoryListChanged?.Invoke();
+            OnInventoryListChanged?.Invoke(this, EventArgs.Empty);
         }
         catch
         {
-            UserInventories = [];
+            _userInventories = [];
             IsError = true;
-            OnInventoryListChanged?.Invoke();
+            OnInventoryListChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -132,21 +133,21 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
 
             if (inventories.Count > 0)
             {
-                UserInventories = inventories;
+                _userInventories = inventories;
                 if (CurrentInventory is not null)
                 {
                     await SetCurrentInventoryAsync(CurrentInventory.Id);
                 }
 
                 IsError = false;
-                OnInventoryListChanged?.Invoke();
+                OnInventoryListChanged?.Invoke(this, EventArgs.Empty);
             }
         }
         catch
         {
-            UserInventories = [];
+            _userInventories = [];
             IsError = true;
-            OnInventoryListChanged?.Invoke();
+            OnInventoryListChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -162,22 +163,22 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
 
             if (CurrentInventory?.Id != inventoryId)
             {
-                UserInventories.RemoveAll(i => i.Id == inventoryId);
+                _userInventories.RemoveAll(i => i.Id == inventoryId);
                 return Result.Deleted;
             }
 
-            var currentInventoryIndex = UserInventories.Index().FirstOrDefault(x => x.Item.Id.Equals(CurrentInventory.Id)).Index;
+            var currentInventoryIndex = _userInventories.Index().FirstOrDefault(x => x.Item.Id.Equals(CurrentInventory.Id)).Index;
 
             var nextIndex = currentInventoryIndex - 1;
             if (nextIndex >= 0)
             {
-                await SetCurrentInventoryAsync(UserInventories[nextIndex].Id);
-                UserInventories.RemoveAll(i => i.Id == inventoryId);
+                await SetCurrentInventoryAsync(_userInventories[nextIndex].Id);
+                _userInventories.RemoveAll(i => i.Id == inventoryId);
                 return Result.Deleted;
             }
 
-            UserInventories.RemoveAll(i => i.Id == inventoryId);
-            await SetCurrentInventoryAsync(UserInventories.FirstOrDefault()?.Id);
+            _userInventories.RemoveAll(i => i.Id == inventoryId);
+            await SetCurrentInventoryAsync(_userInventories.FirstOrDefault()?.Id);
         }
         catch
         {
@@ -187,11 +188,8 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
         return Result.Deleted;
     }
 
-    public async Task NotifyInventoryPageRefreshRequestedAsync()
+    public void NotifyInventoryPageRefreshRequested()
     {
-        if (InventoryPageRefreshRequested is not null)
-        {
-            await InventoryPageRefreshRequested.Invoke();
-        }
+        InventoryPageRefreshRequested?.Invoke(this, EventArgs.Empty);
     }
 }

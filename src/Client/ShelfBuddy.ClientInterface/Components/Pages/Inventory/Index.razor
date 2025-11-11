@@ -1,4 +1,4 @@
-﻿@page "/inventories"
+@page "/inventories"
 @using ShelfBuddy.Contracts
 @using ShelfBuddy.ClientInterface.Components.Shared
 @using ShelfBuddy.ClientInterface.Services
@@ -90,10 +90,10 @@
 </div>
 
 @code {
-    private List<InventoryDto>? _inventories;
-    private List<InventoryDto> _filteredInventories = [];
+    private IList<InventoryDto>? _inventories;
+    private IList<InventoryDto> _filteredInventories = [];
     private bool _isLoading = true;
-    private bool _isDeleting = false;
+    private bool _isDeleting;
     private string? _error;
     private Guid _currentUserId;
     private DeleteConfirmationModal _deleteConfirmationModal = null!;

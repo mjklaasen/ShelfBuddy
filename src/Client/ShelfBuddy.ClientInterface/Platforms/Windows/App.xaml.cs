@@ -8,7 +8,7 @@ namespace ShelfBuddy.ClientInterface.WinUI
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    public partial class App : MauiWinUIApplication
+    internal partial class App : MauiWinUIApplication
     {
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -16,10 +16,13 @@ namespace ShelfBuddy.ClientInterface.WinUI
         /// </summary>
         public App()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
-        protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+        protected override MauiApp CreateMauiApp()
+        {
+            return MauiProgram.CreateMauiApp();
+        }
     }
 
 }

@@ -1,9 +1,9 @@
-﻿using ErrorOr;
+using ErrorOr;
 using ShelfBuddy.Contracts;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public interface IInventoryService
+internal interface IInventoryService
 {
     Task<ErrorOr<InventoryDto>> GetAsync(Guid id);
     Task<List<InventoryDto>> ListAsync(Guid userId, int page = 1, int pageSize = 10);

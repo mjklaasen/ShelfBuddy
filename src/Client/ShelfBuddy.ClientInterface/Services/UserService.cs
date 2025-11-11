@@ -1,8 +1,8 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public class UserService(IHttpClientFactory httpClientFactory) : IUserService
+internal class UserService(IHttpClientFactory httpClientFactory) : IUserService
 {
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
     private UserInfo? _currentUser;

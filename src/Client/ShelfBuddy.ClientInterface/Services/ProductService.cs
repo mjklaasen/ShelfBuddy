@@ -1,10 +1,10 @@
-﻿using ErrorOr;
+using ErrorOr;
 using ShelfBuddy.Contracts;
 using System.Net.Http.Json;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public class ProductService(IHttpClientFactory httpClientFactory) : EntityServiceBase, IProductService
+internal class ProductService(IHttpClientFactory httpClientFactory) : EntityServiceBase, IProductService
 {
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 

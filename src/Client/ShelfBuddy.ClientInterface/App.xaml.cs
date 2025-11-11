@@ -1,9 +1,9 @@
-﻿using ShelfBuddy.ClientInterface.Services;
+using ShelfBuddy.ClientInterface.Services;
 using Microsoft.Maui.ApplicationModel;
 
 namespace ShelfBuddy.ClientInterface
 {
-    public partial class App : Application
+    internal partial class App : Application
     {
         public App()
         {
@@ -19,7 +19,9 @@ namespace ShelfBuddy.ClientInterface
 
         private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
+#pragma warning disable CA2201
             var exception = e.ExceptionObject as Exception ?? new Exception("Unknown error");
+#pragma warning restore CA2201
             Console.WriteLine($"Unhandled Exception: {exception.Message}");
             Console.WriteLine($"Exception Type: {exception.GetType().FullName}");
 

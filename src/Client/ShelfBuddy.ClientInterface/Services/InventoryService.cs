@@ -1,10 +1,10 @@
-﻿using ErrorOr;
+using ErrorOr;
 using ShelfBuddy.Contracts;
 using System.Net.Http.Json;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-public class InventoryService(IHttpClientFactory httpClientFactory) : EntityServiceBase, IInventoryService
+internal class InventoryService(IHttpClientFactory httpClientFactory) : EntityServiceBase, IInventoryService
 {
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 
