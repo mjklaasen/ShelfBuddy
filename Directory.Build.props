@@ -1,0 +1,55 @@
+<Project>
+  <!-- Common properties for all projects -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Changed to false to allow gradual adoption -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <Deterministic>true</Deterministic>
+    <Features>strict</Features>
+  </PropertyGroup>
+
+  <!-- Code Analysis Settings -->
+  <PropertyGroup>
+    <AnalysisMode>All</AnalysisMode>
+    <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Documentation Settings -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Suppress missing XML comment warnings for now - can be enabled gradually -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Performance and Build Settings -->
+  <PropertyGroup>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <!-- Version and Assembly Info -->
+  <PropertyGroup>
+    <Company>ShelfBuddy</Company>
+    <Product>ShelfBuddy Inventory Management System</Product>
+    <Copyright>Copyright © 2024</Copyright>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <!-- Package Settings -->
+  <PropertyGroup>
+    <RepositoryUrl>https://github.com/mjklaasen/ShelfBuddy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <!-- Suppress specific warnings that might be too noisy initially -->
+  <PropertyGroup>
+    <!-- Allow NU1507 (Package version already exists in Directory.Packages.props) -->
+    <NoWarn>$(NoWarn);NU1507</NoWarn>
+  </PropertyGroup>
+</Project>
