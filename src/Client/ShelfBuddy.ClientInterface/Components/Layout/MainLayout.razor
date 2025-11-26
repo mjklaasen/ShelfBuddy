@@ -1,7 +1,6 @@
-﻿@using ShelfBuddy.ClientInterface.Services
+@using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.ClientInterface.Components.Shared
 @inject IUserService UserService
-@inject NavigationManager NavigationManager
 @inject IInventoryStateService InventoryStateService
 @inject ErrorHandlingService ErrorHandlingService
 @inherits LayoutComponentBase
@@ -29,7 +28,7 @@
             </div>
         </main>
 
-        <div class="side-menu @(_navMenu.IsOpen ? "menu-open" : "")">
+        <div class="side-menu @(_navMenu?.IsOpen ?? false ? "menu-open" : "")">
             <div class="menu-header">
                 <span>Menu</span>
                 <button class="menu-close" @onclick="ToggleMenu">
@@ -41,7 +40,7 @@
             </div>
         </div>
 
-        @if (_navMenu.IsOpen)
+        @if (_navMenu?.IsOpen ?? false)
         {
             <div class="menu-overlay" @onclick="ToggleMenu"></div>
         }
