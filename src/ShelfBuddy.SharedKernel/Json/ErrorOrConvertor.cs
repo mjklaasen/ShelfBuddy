@@ -1,4 +1,4 @@
-﻿using ErrorOr;
+using ErrorOr;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
@@ -25,10 +25,10 @@ public class ErrorOrConverter<T> : JsonConverter<ErrorOr<T>>
 
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                var propertyName = reader.GetString()?.ToLower();
+                var propertyName = reader.GetString()?.ToUpperInvariant();
                 switch (propertyName)
                 {
-                    case "errors":
+                    case "ERRORS":
                         reader.Read();
                         while (reader.TokenType != JsonTokenType.EndArray)
                         {
@@ -45,10 +45,10 @@ public class ErrorOrConverter<T> : JsonConverter<ErrorOr<T>>
                             reader.Read();
                         }
                         break;
-                    case "value":
+                    case "VALUE":
                         value = GetValue(ref reader, options);
                         break;
-                    case "iserror":
+                    case "ISERROR":
                         reader.Read();
                         isError = reader.GetBoolean();
                         break;

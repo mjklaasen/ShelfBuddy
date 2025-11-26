@@ -1,5 +1,5 @@
-﻿@using Microsoft.AspNetCore.Components
 @using ShelfBuddy.ClientInterface.Services
+@using ErrorEventArgs = ShelfBuddy.ClientInterface.ErrorEventArgs
 @implements IDisposable
 
 @inject ErrorHandlingService ErrorService
@@ -40,8 +40,11 @@
         ErrorService.OnClearError -= ClearError;
     }
 
-    private void HandleError(Exception ex, string context)
+    private void HandleError(object? sender, ErrorEventArgs e)
     {
+        var ex = e.Exception;
+        var context = e.Context;
+
         // Important: Log to console for debugging before anything else
         Console.WriteLine($"ErrorToast handling error: {ex.GetType().FullName}");
         Console.WriteLine($"Error message: {ex.Message}");
@@ -54,7 +57,7 @@
 
 #if ANDROID
         // Ensure UI updates happen on the main thread for Android
-        MainThread.BeginInvokeOnMainThread(async () => 
+        MainThread.InvokeOnMainThreadAsync(async () =>
         {
             await InvokeAsync(StateHasChanged);
             Console.WriteLine("Android: UI updated via MainThread");
@@ -110,7 +113,7 @@
         StateHasChanged();
     }
 
-    private void ClearError()
+    private void ClearError(object? sender, EventArgs e)
     {
         _visible = false;
         StateHasChanged();

@@ -1,12 +1,12 @@
-﻿namespace ShelfBuddy.ClientInterface;
+namespace ShelfBuddy.ClientInterface;
 
-public class ProblemDetails
+internal class ProblemDetails
 {
     public string? Title { get; set; }
     public string? Detail { get; set; }
 }
 
-public class ValidationProblemDetails : ProblemDetails
+internal class ValidationProblemDetails : ProblemDetails
 {
-    public Dictionary<string, string[]> Errors { get; set; } = [];
+    public Dictionary<string, string[]> Errors { get; init; } = [];
 }

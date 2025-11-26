@@ -1,5 +1,5 @@
-﻿using ErrorOr;
+using ErrorOr;
 
 namespace ShelfBuddy.Contracts;
 
-public record ErrorResponse(List<Error> Errors);
+public record ErrorResponse(IList<Error> Errors);

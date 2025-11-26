@@ -1,6 +1,6 @@
-﻿namespace ShelfBuddy.ClientInterface
+namespace ShelfBuddy.ClientInterface
 {
-    public partial class MainPage : ContentPage
+    internal partial class MainPage : ContentPage
     {
         public MainPage()
         {

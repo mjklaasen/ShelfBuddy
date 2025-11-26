@@ -1,6 +1,6 @@
-﻿namespace ShelfBuddy.ClientInterface.Services;
+namespace ShelfBuddy.ClientInterface.Services;
 
-public class MockUserService : IUserService
+internal sealed class MockUserService : IUserService
 {
     // Predefined mock users
     private readonly Dictionary<string, UserInfo> _mockUsers = new()

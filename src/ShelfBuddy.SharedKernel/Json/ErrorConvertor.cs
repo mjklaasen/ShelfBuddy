@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+using System.Buffers;
+using System.Globalization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ErrorOr;
 using ShelfBuddy.SharedKernel.Extensions;
@@ -35,18 +37,18 @@ public class ErrorConverter : JsonConverter<Error>
 
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                var propertyName = reader.GetString()?.ToLower();
+                var propertyName = reader.GetString()?.ToUpperInvariant();
                 switch (propertyName)
                 {
-                    case "code":
+                    case "CODE":
                         reader.Read();
                         code = reader.GetString() ?? string.Empty;
                         break;
-                    case "description":
+                    case "DESCRIPTION":
                         reader.Read();
                         description = reader.GetString() ?? string.Empty;
                         break;
-                    case "type":
+                    case "TYPE":
                         reader.Read();
                         if (reader.TokenType == JsonTokenType.String)
                         {
@@ -55,14 +57,14 @@ public class ErrorConverter : JsonConverter<Error>
                         }
                         errorType = (ErrorType)reader.GetInt32();
                         break;
-                    case "numerictype":
+                    case "NUMERICTYPE":
                         reader.Read();
                         numericType = reader.GetInt32();
                         break;
-                    case "metadata":
+                    case "METADATA":
                         reader.Read();
                         metadata = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(ref reader, options)
-                            ?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToObject());
+                            ?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToObject(CultureInfo.InvariantCulture));
                         break;
                 }
             }

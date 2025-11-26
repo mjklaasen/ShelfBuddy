@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using ShelfBuddy.ClientInterface.Services;
 
 namespace ShelfBuddy.ClientInterface
 {
-    public static class MauiProgram
+    internal static class MauiProgram
     {
         public static MauiApp CreateMauiApp()
         {
@@ -20,7 +20,7 @@ namespace ShelfBuddy.ClientInterface
             builder.Services.AddHttpClient("api", client =>
                 {
 #if ANDROID
-                    client.BaseAddress = Environment.OSVersion.VersionString.Contains("35")
+                    client.BaseAddress = Environment.OSVersion.VersionString.Contains("35", StringComparison.Ordinal)
                         ? new Uri(
                             "https://10.0.2.2:7088") // 10.0.2.2 is the special IP address to connect to the host machine from Android emulator
                         : new Uri("https://192.168.178.50:7088"); // For physical phone, but doesn't work, need to fix.
@@ -33,7 +33,7 @@ namespace ShelfBuddy.ClientInterface
                 // Configure the message handler for Android to trust the development certificate
                 .ConfigurePrimaryHttpMessageHandler(() =>
                 {
-                    var handler = HttpsClientHandlerService.GetPlatformMessageHandler();
+                    var handler = HttpsClientHandlerService.PlatformMessageHandler;
                     if (handler is HttpClientHandler httpHandler)
                     {
 #if  DEBUG
@@ -65,7 +65,7 @@ namespace ShelfBuddy.ClientInterface
         }
     }
 
-    public class HttpExceptionHandler(ErrorHandlingService errorService) : DelegatingHandler
+    internal class HttpExceptionHandler(ErrorHandlingService errorService) : DelegatingHandler
     {
         private readonly ErrorHandlingService _errorService = errorService;
 

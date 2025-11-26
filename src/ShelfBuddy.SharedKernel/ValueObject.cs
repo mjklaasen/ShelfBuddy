@@ -1,17 +1,17 @@
-﻿namespace ShelfBuddy.SharedKernel;
+namespace ShelfBuddy.SharedKernel;
 
 public abstract class ValueObject
 {
     public abstract IEnumerable<object> GetEqualityComponents();
 
-    public override bool Equals(object? other)
+    public override bool Equals(object? obj)
     {
-        if (other is null || other.GetType() != GetType())
+        if (obj is null || obj.GetType() != GetType())
         {
             return false;
         }
 
-        return ((ValueObject)other)
+        return ((ValueObject)obj)
             .GetEqualityComponents()
             .SequenceEqual(GetEqualityComponents());
     }

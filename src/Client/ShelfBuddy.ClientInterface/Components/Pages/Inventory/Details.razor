@@ -1,4 +1,4 @@
-﻿@page "/inventory/{Id:guid}"
+@page "/inventory/{Id:guid}"
 @using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 @using ShelfBuddy.ClientInterface.Components.Shared
@@ -100,15 +100,16 @@
                                             <ProductComponent ProductId="@productId" Quantity="@quantity" />
                                         </td>
                                         <td>
+                                            @{ var buttonDisabled = quantity <= 1;}
                                             <div class="d-flex align-items-center">
                                                 <button class="btn btn-sm btn-outline-secondary me-2"
-                                                @onclick="() => UpdateProductQuantityAsync(productId, quantity - 1)"
-                                                disabled="@(quantity <= 1)">
+                                                        @onclick="() => UpdateProductQuantityAsync(productId, quantity - 1)"
+                                                        disabled="@buttonDisabled">
                                                     <i class="bi bi-dash"></i>
                                                 </button>
                                                 <span>@quantity</span>
                                                 <button class="btn btn-sm btn-outline-secondary ms-2"
-                                                @onclick="() => UpdateProductQuantityAsync(productId, quantity + 1)">
+                                                        @onclick="() => UpdateProductQuantityAsync(productId, quantity + 1)">
                                                     <i class="bi bi-plus"></i>
                                                 </button>
                                             </div>
@@ -163,7 +164,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        InventoryStateService.InventoryPageRefreshRequested += RefreshPageAsync;
+        InventoryStateService.InventoryPageRefreshRequested += RefreshPage;
 
         // Check authentication
         var isAuthenticated = await UserService.IsAuthenticatedAsync();
@@ -321,7 +322,7 @@
         NavigationManager.NavigateTo($"/inventory/{id}/products/add");
     }
 
-    private async Task RefreshPageAsync()
+    private void RefreshPage(object? sender, EventArgs e)
     {
         if (InventoryStateService.CurrentInventory?.Id is null)
         {
@@ -330,12 +331,11 @@
         }
 
         Id = InventoryStateService.CurrentInventory.Id.Value;
-        await LoadInventoryAsync();
-        StateHasChanged();
+        _ = MainThread.InvokeOnMainThreadAsync(async () => await LoadInventoryAsync()).ContinueWith(_ => StateHasChanged());
     }
 
     public void Dispose()
     {
-        InventoryStateService.InventoryPageRefreshRequested -= RefreshPageAsync;
+        InventoryStateService.InventoryPageRefreshRequested -= RefreshPage;
     }
 }

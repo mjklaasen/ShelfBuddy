@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace ShelfBuddy.SharedKernel.Extensions;
 
@@ -6,7 +6,12 @@ public static class JsonElementExtensions
 {
     public static object ToObject(this JsonElement element, IFormatProvider? formatProvider = null)
     {
-        return element.ValueKind switch
+        return ToObject(element.ValueKind, element, formatProvider);
+    }
+
+    private static object ToObject(JsonValueKind valueKind, JsonElement element, IFormatProvider? formatProvider = null)
+    {
+        return valueKind switch
         {
             JsonValueKind.Object => element.Deserialize<object>() ?? new object(),
             JsonValueKind.Array => element.EnumerateArray().Select(x => x.ToObject(formatProvider)).ToArray(),
@@ -21,7 +26,7 @@ public static class JsonElementExtensions
             JsonValueKind.True => true,
             JsonValueKind.False => false,
             JsonValueKind.Null => null!,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(valueKind))
         };
     }
 }

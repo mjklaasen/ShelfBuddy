@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ShelfBuddy.InventoryManagement.Application;
 using ShelfBuddy.InventoryManagement.Domain;
 
