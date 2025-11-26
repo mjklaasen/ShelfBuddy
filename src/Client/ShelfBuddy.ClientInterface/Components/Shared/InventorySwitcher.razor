@@ -78,7 +78,9 @@
             }
         }
 
-        while (!InventoryStateService.IsInitialized)
+        var retries = 0;
+        const int maxRetries = 50; // 50 * 100ms = 5 seconds
+        while (!InventoryStateService.IsInitialized && retries++ < maxRetries)
         {
             await Task.Delay(100);
         }

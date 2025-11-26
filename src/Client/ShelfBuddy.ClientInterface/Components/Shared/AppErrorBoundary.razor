@@ -10,9 +10,6 @@
 </CascadingValue>
 
 @code {
-    //[Parameter]
-    //public RenderFragment? ChildContent { get; set; }
-
     protected override Task OnErrorAsync(Exception exception)
     {
         ErrorService.ReportError(exception, "UI Render Error");

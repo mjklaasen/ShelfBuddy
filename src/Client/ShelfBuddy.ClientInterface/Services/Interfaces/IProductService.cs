@@ -10,4 +10,5 @@ public interface IProductService
     Task<ErrorOr<ProductDto>> CreateAsync(string name, string category);
     Task<ErrorOr<Updated>> UpdateAsync(ProductDto product);
     Task<ErrorOr<Deleted>> DeleteAsync(Guid productId);
+    Task<int> CountAsync();
 }

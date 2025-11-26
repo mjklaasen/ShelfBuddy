@@ -89,4 +89,25 @@ public class ProductService(IHttpClientFactory httpClientFactory) : EntityServic
 
         return Result.Deleted;
     }
+
+    public async Task<int> CountAsync()
+    {
+        var client = _httpClientFactory.CreateClient("api");
+        var response =
+            await client.GetAsync(new Uri($"/api/v1/products?page=1&pageSize=1",
+                UriKind.Relative));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return 0;
+        }
+
+        var totalCountHeaderValue = response.Headers.GetValues("X-Total-Count").FirstOrDefault();
+        if (!string.IsNullOrEmpty(totalCountHeaderValue) && int.TryParse(totalCountHeaderValue, out var totalCount))
+        {
+            return totalCount;
+        }
+
+        return 0;
+    }
 }

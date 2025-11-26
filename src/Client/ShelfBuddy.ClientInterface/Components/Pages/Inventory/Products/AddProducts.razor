@@ -305,14 +305,15 @@
 
             // Load all products for search functionality
             var products = await ProductService.ListAsync();
-            if (products.Count == 10)
+            var totalCount = await ProductService.CountAsync();
+            if (products.Count < totalCount)
             {
-                var newProducts = products;
+                var pageProducts = products;
                 var page = 2;
-                while (newProducts.Count > 0)
+                while (pageProducts.Count > 0)
                 {
-                    newProducts = await ProductService.ListAsync(page: page);
-                    products.AddRange(newProducts);
+                    pageProducts = await ProductService.ListAsync(page: page);
+                    products.AddRange(pageProducts);
                     page++;
                 }
             }

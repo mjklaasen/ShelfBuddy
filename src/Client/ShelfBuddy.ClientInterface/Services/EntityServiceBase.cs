@@ -30,7 +30,7 @@ public abstract class EntityServiceBase
             return response.StatusCode switch
             {
                 HttpStatusCode.NotFound => [Error.NotFound(code: errorResponse.Title ?? "NotFound",
-                    description: errorResponse.Detail ?? response.ReasonPhrase ?? "Cannot find the inventory")],
+                    description: errorResponse.Detail ?? response.ReasonPhrase ?? "Resource not found")],
                 HttpStatusCode.Unauthorized => [Error.Unauthorized(code: errorResponse.Title ?? "Unauthorized",
                     description: errorResponse.Detail ?? response.ReasonPhrase ?? "You are not logged in")],
                 HttpStatusCode.Forbidden => [Error.Forbidden(code: errorResponse.Title ?? "Forbidden",

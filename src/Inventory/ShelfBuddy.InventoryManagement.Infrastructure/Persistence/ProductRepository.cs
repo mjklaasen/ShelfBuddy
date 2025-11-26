@@ -53,7 +53,8 @@ public class ProductRepository(InventoryDbContext dbContext) : IProductRepositor
 
         if (!string.IsNullOrWhiteSpace(productCategory))
         {
-            products = products.Where(x => x.ProductCategory.Name.Equals(productCategory));
+            products = products.Where(x =>
+                x.ProductCategory.Name.Equals(productCategory, StringComparison.OrdinalIgnoreCase));
         }
 
         return await products
@@ -68,7 +69,8 @@ public class ProductRepository(InventoryDbContext dbContext) : IProductRepositor
         var products = _dbContext.Products.AsQueryable();
         if (!string.IsNullOrWhiteSpace(productCategory))
         {
-            products = products.Where(x => x.ProductCategory.Name.Equals(productCategory));
+            products = products.Where(x =>
+                x.ProductCategory.Name.Equals(productCategory, StringComparison.OrdinalIgnoreCase));
         }
         return await products.CountAsync();
     }
