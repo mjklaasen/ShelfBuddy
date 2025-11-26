@@ -36,7 +36,9 @@ namespace ShelfBuddy.ClientInterface
                     var handler = HttpsClientHandlerService.GetPlatformMessageHandler();
                     if (handler is HttpClientHandler httpHandler)
                     {
+#if  DEBUG
                         httpHandler.ServerCertificateCustomValidationCallback = (_, _, _, _) => true;
+#endif
                     }
 
                     return handler;

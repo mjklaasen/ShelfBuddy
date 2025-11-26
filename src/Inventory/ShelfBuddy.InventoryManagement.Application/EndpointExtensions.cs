@@ -60,7 +60,7 @@ public static class EndpointExtensions
                 {
                     var listInventoriesResult = await inventoryRepository.ListAsync(page, pageSize, userId);
                     var inventories = listInventoriesResult as List<Inventory> ?? listInventoriesResult.ToList();
-                    context.Response.Headers.Append("X-Total-Count", (await inventoryRepository.CountAsync()).ToString());
+                    context.Response.Headers.Append("X-Total-Count", (await inventoryRepository.CountAsync(userId)).ToString());
                     return Results.Ok(inventories.Select(x =>
                         new InventoryDto(x.Id, x.Name, x.UserId, x.Products.ToDictionary())));
                 })
@@ -121,7 +121,7 @@ public static class EndpointExtensions
             {
                 var listProductsResult = await productRepository.ListAsync(page, pageSize, productCategory);
                 var products = listProductsResult as List<Product> ?? listProductsResult.ToList();
-                context.Response.Headers.Append("X-Total-Count", (await productRepository.CountAsync()).ToString());
+                context.Response.Headers.Append("X-Total-Count", (await productRepository.CountAsync(productCategory)).ToString());
                 return Results.Ok(products.Select(x =>
                     new ProductDto(x.Id, x.Name,
                         new ProductCategoryDto(x.ProductCategory.Id, x.ProductCategory.Name))));

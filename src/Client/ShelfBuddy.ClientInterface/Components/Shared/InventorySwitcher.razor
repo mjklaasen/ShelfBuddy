@@ -4,7 +4,7 @@
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JsRuntime
-@implements IDisposable
+@implements IAsyncDisposable
 
 <div class="inventory-switcher">
     @if (_isLoading)
@@ -192,7 +192,7 @@
         StateHasChanged();
     }
     
-    public async void Dispose()
+    public async ValueTask DisposeAsync()
     {
         try
         {

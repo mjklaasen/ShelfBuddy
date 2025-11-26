@@ -21,12 +21,14 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
     {
         IsInitialized = false;
         IsLoading = true;
-        var lastInventoryId = Guid.Parse(_preferences.Get("CurrentInventoryId", Guid.Empty.ToString()));
-        if (lastInventoryId != Guid.Empty)
+
+        if (Guid.TryParse(_preferences.Get("CurrentInventoryId", Guid.Empty.ToString()), out var lastInventoryId) &&
+            lastInventoryId != Guid.Empty)
         {
             await SetCurrentInventoryAsync(lastInventoryId);
             await LoadUserInventoriesAsync(userId);
             IsInitialized = true;
+            IsLoading = false;
             return;
         }
 
@@ -67,6 +69,7 @@ public class InventoryStateService(IInventoryService inventoryService, IPreferen
                 IsError = false;
                 OnInventoryChanged?.Invoke();
                 _preferences.Set("CurrentInventoryId", inventoryId.Value.ToString());
+                return;
             }
 
             CurrentInventory = null;
