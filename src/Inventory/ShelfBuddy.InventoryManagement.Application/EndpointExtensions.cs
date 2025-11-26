@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using ShelfBuddy.API.Common;
 using ShelfBuddy.Contracts;
+using ShelfBuddy.InventoryManagement.Domain;
 
 namespace ShelfBuddy.InventoryManagement.Application;
 
@@ -19,9 +20,9 @@ public static class EndpointExtensions
 
     private static IEndpointRouteBuilder MapInventoryEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/inventory")
-            .WithGroupName("Inventory")
-            .WithTags("Inventory");
+        var group = app.MapGroup("api/v1/inventories")
+            .WithGroupName("Inventories")
+            .WithTags("Inventories");
 
         group.MapPost("/",
                 async ([FromBody] CreateInventory message, [FromServices] IRequestClient<CreateInventory> client) =>
@@ -54,10 +55,12 @@ public static class EndpointExtensions
             .WithName("UpdateInventory");
 
         group.MapGet("/",
-                async ([FromServices] IInventoryRepository inventoryRepository, [FromQuery] int page = 1,
+                async (HttpContext context, [FromServices] IInventoryRepository inventoryRepository, [FromQuery] int page = 1,
                     [FromQuery] int pageSize = 10, [FromQuery] Guid? userId = null) =>
                 {
-                    var inventories = await inventoryRepository.ListAsync(page, pageSize, userId);
+                    var listInventoriesResult = await inventoryRepository.ListAsync(page, pageSize, userId);
+                    var inventories = listInventoriesResult as List<Inventory> ?? listInventoriesResult.ToList();
+                    context.Response.Headers.Append("X-Total-Count", (await inventoryRepository.CountAsync(userId)).ToString());
                     return Results.Ok(inventories.Select(x =>
                         new InventoryDto(x.Id, x.Name, x.UserId, x.Products.ToDictionary())));
                 })
@@ -86,9 +89,9 @@ public static class EndpointExtensions
 
     private static IEndpointRouteBuilder MapProductEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/product")
-            .WithGroupName("Product")
-            .WithTags("Product");
+        var group = app.MapGroup("/api/v1/products")
+            .WithGroupName("Products")
+            .WithTags("Products");
 
         group.MapPost("/",
                 async ([FromBody] CreateProduct message, [FromServices] IRequestClient<CreateProduct> client) =>
@@ -113,12 +116,15 @@ public static class EndpointExtensions
             })
             .WithName("GetProduct");
 
-        group.MapGet("/", async ([FromServices] IProductRepository productRepository,
-                [FromQuery] int page = 1, [FromQuery] int pageSize = 10) =>
+        group.MapGet("/", async (HttpContext context, [FromServices] IProductRepository productRepository,
+                [FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? productCategory = null) =>
             {
-                var products = await productRepository.ListAsync();
+                var listProductsResult = await productRepository.ListAsync(page, pageSize, productCategory);
+                var products = listProductsResult as List<Product> ?? listProductsResult.ToList();
+                context.Response.Headers.Append("X-Total-Count", (await productRepository.CountAsync(productCategory)).ToString());
                 return Results.Ok(products.Select(x =>
-                    new ProductDto(x.Id, x.Name, new ProductCategoryDto(x.ProductCategory.Id, x.ProductCategory.Name))));
+                    new ProductDto(x.Id, x.Name,
+                        new ProductCategoryDto(x.ProductCategory.Id, x.ProductCategory.Name))));
             })
             .WithName("ListProducts");
 

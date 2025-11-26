@@ -1,8 +1,7 @@
 ﻿@page "/inventory/new"
 @using System.ComponentModel.DataAnnotations
 @using ShelfBuddy.ClientInterface.Services
-@using ShelfBuddy.Contracts
-@inject IHttpClientFactory HttpClientFactory
+@inject IInventoryService InventoryService
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
 @inject IInventoryStateService InventoryStateService
@@ -59,7 +58,7 @@
 
 @code {
     private readonly InventoryModel _inventoryModel = new();
-    private bool _isCreating = false;
+    private bool _isCreating;
     private string? _error;
     private Guid _currentUserId;
 
@@ -91,37 +90,19 @@
 
         try
         {
-            var client = HttpClientFactory.CreateClient("api");
+            var createInventoryResponse = await InventoryService.CreateAsync(_inventoryModel.Name, _currentUserId);
 
-            var createRequest = new
+            if (!createInventoryResponse.IsError)
             {
-                Name = _inventoryModel.Name,
-                UserId = _currentUserId
-            };
-
-            var response = await client.PostAsJsonAsync("/inventory", createRequest);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<InventoryDto>();
+                var result = createInventoryResponse.Value;
                 await InventoryStateService.RefreshInventoriesAsync(_currentUserId);
-                await InventoryStateService.SetCurrentInventoryAsync(result?.Id);
+                await InventoryStateService.SetCurrentInventoryAsync(result.Id);
 
-                NavigationManager.NavigateTo($"/inventory/{result?.Id}");
+                NavigationManager.NavigateTo($"/inventory/{result.Id}");
                 return;
             }
             
-            _error = $"Failed to create inventory: {response.ReasonPhrase}";
-
-            try
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                if (!string.IsNullOrEmpty(errorContent))
-                {
-                    _error += $" - {errorContent}";
-                }
-            }
-            catch { /* Ignore error reading content */ }
+            _error = $"Failed to create inventory: {createInventoryResponse.FirstError.Description}";
         }
         catch (Exception ex)
         {

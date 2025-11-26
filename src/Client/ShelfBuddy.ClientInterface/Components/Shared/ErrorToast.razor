@@ -1,0 +1,124 @@
+﻿@using Microsoft.AspNetCore.Components
+@using ShelfBuddy.ClientInterface.Services
+@implements IDisposable
+
+@inject ErrorHandlingService ErrorService
+@inject NavigationManager Navigation
+
+<div class="error-toast @(_visible ? "show" : "")" style="@(_visible ? "" : "display: none;")">
+    <div class="error-toast-header">
+        <i class="bi bi-exclamation-triangle"></i>
+        <span>@_context</span>
+    </div>
+    <div class="error-toast-body">
+        @_errorMessage
+    </div>
+    <div class="error-toast-actions">
+        <button class="btn btn-sm btn-outline" @onclick="DismissError">Dismiss</button>
+        @if (_canReload)
+        {
+            <button class="btn btn-sm btn-primary" @onclick="ReloadPage">Reload</button>
+        }
+    </div>
+</div>
+
+@code {
+    private bool _visible;
+    private string _errorMessage = "";
+    private string _context = "";
+    private bool _canReload;
+
+    protected override void OnInitialized()
+    {
+        ErrorService.OnError += HandleError;
+        ErrorService.OnClearError += ClearError;
+    }
+
+    public void Dispose()
+    {
+        ErrorService.OnError -= HandleError;
+        ErrorService.OnClearError -= ClearError;
+    }
+
+    private void HandleError(Exception ex, string context)
+    {
+        // Important: Log to console for debugging before anything else
+        Console.WriteLine($"ErrorToast handling error: {ex.GetType().FullName}");
+        Console.WriteLine($"Error message: {ex.Message}");
+        Console.WriteLine($"Context: {context}");
+        
+        _visible = true;
+        _errorMessage = GetFriendlyErrorMessage(ex);
+        _context = context;
+        _canReload = true;
+
+#if ANDROID
+        // Ensure UI updates happen on the main thread for Android
+        MainThread.BeginInvokeOnMainThread(async () => 
+        {
+            await InvokeAsync(StateHasChanged);
+            Console.WriteLine("Android: UI updated via MainThread");
+        });
+#else
+        InvokeAsync(StateHasChanged);
+#endif
+
+        _ = AutoDismissAsync();
+    }
+
+    private static string GetFriendlyErrorMessage(Exception ex)
+    {
+        if (ex is HttpRequestException httpEx)
+        {
+            return $"Network error: {httpEx.Message}. Check your internet connection and ensure the server is running.";
+        }
+        if (ex is TaskCanceledException)
+        {
+            return "The server took too long to respond. Please check your connection and try again.";
+        }
+        if (ex is OperationCanceledException)
+        {
+            return "Operation timed out. Please check your connection and try again.";
+        }
+        return ex.Message;
+    }
+
+    private async Task AutoDismissAsync()
+    {
+        try 
+        {
+            await Task.Delay(TimeSpan.FromSeconds(30));
+            if (_visible)
+            {
+                _visible = false;
+#if ANDROID
+                MainThread.BeginInvokeOnMainThread(async () => await InvokeAsync(StateHasChanged));
+#else
+                await InvokeAsync(StateHasChanged);
+#endif
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in AutoDismissAsync: {ex.Message}");
+        }
+    }
+
+    private void DismissError()
+    {
+        _visible = false;
+        StateHasChanged();
+    }
+
+    private void ClearError()
+    {
+        _visible = false;
+        StateHasChanged();
+    }
+
+    private void ReloadPage()
+    {
+        _visible = false;
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+}

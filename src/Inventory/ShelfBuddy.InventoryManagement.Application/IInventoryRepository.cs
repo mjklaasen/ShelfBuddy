@@ -9,4 +9,5 @@ public interface IInventoryRepository
     Task DeleteAsync(Guid id);
     Task<Inventory?> GetByIdAsync(Guid id);
     Task<IEnumerable<Inventory>> ListAsync(int page = 1, int pageSize = 10, Guid? userId = null);
+    Task<int> CountAsync(Guid? userId = null);
 }

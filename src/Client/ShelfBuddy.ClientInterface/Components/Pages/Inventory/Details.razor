@@ -2,7 +2,7 @@
 @using ShelfBuddy.ClientInterface.Services
 @using ShelfBuddy.Contracts
 @using ShelfBuddy.ClientInterface.Components.Shared
-@inject IHttpClientFactory HttpClientFactory
+@inject IInventoryService InventoryService
 @inject IUserService UserService
 @inject NavigationManager NavigationManager
 @inject IInventoryStateService InventoryStateService
@@ -93,7 +93,6 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            @*TODO: make it so that if the screen has a width lower than some value, the text doesn't show for the delete button. Or else just don't show it at all*@
                                 @foreach (var (productId, quantity) in _inventory.Products)
                                 {
                                     <tr>
@@ -136,10 +135,10 @@
         </div>
 
         <DeleteConfirmationModal @ref="_deleteConfirmationModal" 
-                                 ItemType="inventory"
-                                 ItemName="@(_inventory?.Name)"
-                                 OnDelete="DeleteInventoryAsync"
-                                 IsDeleting="_isDeleting" />
+        ItemType="inventory"
+        ItemName="@(_inventory?.Name)"
+        OnDelete="DeleteInventoryAsync"
+        IsDeleting="_isDeleting" />
     }
     else
     {
@@ -194,28 +193,22 @@
 
         try
         {
-            var client = HttpClientFactory.CreateClient("api");
-            var response = await client.GetAsync(new Uri($"/inventory/{Id}", UriKind.Relative));
-
-            if (response.IsSuccessStatusCode)
+            var getInventoryResult = await InventoryService.GetAsync(Id);
+            if (getInventoryResult.IsError)
             {
-                _inventory = await response.Content.ReadFromJsonAsync<InventoryDto>();
-
-                // Verify if the inventory belongs to the current user
-                if (_inventory?.UserId != _currentUser?.Id)
-                {
-                    _error = "You do not have permission to view this inventory.";
-                    _inventory = null;
-                }
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
+                _error = getInventoryResult.FirstError.Description;
                 _inventory = null;
+                return;
             }
-            else
+
+            if (getInventoryResult.Value.UserId != _currentUser?.Id)
             {
-                _error = $"Failed to load inventory: {response.ReasonPhrase}";
+                _error = "You do not have permission to view this inventory.";
+                _inventory = null;
+                return;
             }
+
+            _inventory = getInventoryResult.Value;
         }
         catch (Exception ex)
         {
@@ -249,17 +242,9 @@
                 updatedInventory.Products[productId] = newQuantity;
             }
 
-            var client = HttpClientFactory.CreateClient("api");
-            var response = await client.PutAsJsonAsync(new Uri($"/inventory/{Id}", UriKind.Relative), updatedInventory);
-
-            if (response.IsSuccessStatusCode)
-            {
-                _inventory = updatedInventory;
-            }
-            else
-            {
-                _error = $"Failed to update product quantity: {response.ReasonPhrase}";
-            }
+            (await InventoryService.UpdateAsync(updatedInventory)).SwitchFirst(
+                _ => _inventory = updatedInventory, 
+                error => _error = error.Description);
         }
         catch (Exception ex)
         {

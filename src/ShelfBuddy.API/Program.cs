@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using ShelfBuddy.API;
 using ShelfBuddy.InventoryManagement.Application;
 using ShelfBuddy.SharedKernel.Json;

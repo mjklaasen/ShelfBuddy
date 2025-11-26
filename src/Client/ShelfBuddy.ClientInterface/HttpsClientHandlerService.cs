@@ -5,7 +5,7 @@ namespace ShelfBuddy.ClientInterface;
 
 public class HttpsClientHandlerService
 {
-    public HttpMessageHandler GetPlatformMessageHandler()
+    public static HttpMessageHandler GetPlatformMessageHandler()
     {
         var handler = new AndroidMessageHandler
         {
