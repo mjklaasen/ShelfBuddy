@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Xml.Linq;
 
 namespace ShelfBuddy.SharedKernel.Extensions;
 

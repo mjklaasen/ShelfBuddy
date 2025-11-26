@@ -59,13 +59,8 @@ public class ErrorOrConverter<T> : JsonConverter<ErrorOr<T>>
         return new ErrorOr<T>();
     }
 
-    public override void Write(Utf8JsonWriter? writer, ErrorOr<T> value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, ErrorOr<T> value, JsonSerializerOptions options)
     {
-        if (writer is null)
-        {
-            return;
-        }
-
         writer.WriteStartObject();
         writer.WriteBoolean("isError", value.IsError);
         writer.WriteStartArray("errors");

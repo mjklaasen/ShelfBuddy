@@ -331,9 +331,7 @@
         }
 
         Id = InventoryStateService.CurrentInventory.Id.Value;
-        MainThread.BeginInvokeOnMainThread(() => LoadInventoryAsync().Wait());
-        
-        StateHasChanged();
+        _ = MainThread.InvokeOnMainThreadAsync(async () => await LoadInventoryAsync()).ContinueWith(_ => StateHasChanged());
     }
 
     public void Dispose()

@@ -2,8 +2,8 @@ namespace ShelfBuddy.ClientInterface.Services;
 
 internal class ErrorHandlingService
 {
-    public event EventHandler<ErrorEventArgs> OnError = (_, _) => { };
-    public event EventHandler OnClearError = (_, _) => { };
+    public event EventHandler<ErrorEventArgs>? OnError;
+    public event EventHandler? OnClearError;
 
     public void ReportError(Exception ex, string? context = null)
     {
@@ -29,7 +29,7 @@ internal class ErrorHandlingService
         Console.WriteLine($"ErrorHandlingService - Error message: {errorMessage}");
         Console.WriteLine($"Context: {context}");
 
-        OnError?.Invoke(this, new ErrorEventArgs(new ApplicationErrorException(errorMessage), context ?? "An error occurred"));
+        OnError?.Invoke(this, new ErrorEventArgs(new InvalidOperationException(errorMessage), context ?? "An error occurred"));
     }
 
     public void ClearError()

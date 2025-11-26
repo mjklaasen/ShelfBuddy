@@ -69,12 +69,7 @@
 
     private void ToggleMenu()
     {
-        if (_navMenu is null)
-        {
-            return;
-        }
-        //TODO: When migrated to .NET 10, use conditional assignment.
-        _navMenu.IsOpen = !_navMenu.IsOpen;
+        _navMenu?.IsOpen = !_navMenu.IsOpen;
         StateHasChanged();
     }
 
