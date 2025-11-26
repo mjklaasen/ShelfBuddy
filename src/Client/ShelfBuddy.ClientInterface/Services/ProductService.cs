@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-internal class ProductService(IHttpClientFactory httpClientFactory) : EntityServiceBase, IProductService
+internal sealed class ProductService(IHttpClientFactory httpClientFactory) : EntityServiceBase, IProductService
 {
     private readonly IHttpClientFactory _httpClientFactory = httpClientFactory;
 

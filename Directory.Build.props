@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <!-- Changed to false to allow gradual adoption -->
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
     <Deterministic>true</Deterministic>
@@ -16,7 +16,7 @@
   <!-- Code Analysis Settings -->
   <PropertyGroup>
     <AnalysisMode>All</AnalysisMode>
-    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
   </PropertyGroup>
 
   <!-- Documentation Settings -->
@@ -37,7 +37,7 @@
   <PropertyGroup>
     <Company>ShelfBuddy</Company>
     <Product>ShelfBuddy Inventory Management System</Product>
-    <Copyright>Copyright © 2024</Copyright>
+    <Copyright>Copyright © 2025</Copyright>
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 

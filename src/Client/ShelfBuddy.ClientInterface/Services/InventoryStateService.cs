@@ -3,7 +3,7 @@ using ShelfBuddy.Contracts;
 
 namespace ShelfBuddy.ClientInterface.Services;
 
-internal class InventoryStateService(IInventoryService inventoryService, IPreferences preferences) : IInventoryStateService
+internal sealed class InventoryStateService(IInventoryService inventoryService, IPreferences preferences) : IInventoryStateService
 {
     private readonly IInventoryService _inventoryService = inventoryService;
     private readonly IPreferences _preferences = preferences;

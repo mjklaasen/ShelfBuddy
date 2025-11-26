@@ -1,4 +1,4 @@
-﻿using MassTransit;
+using MassTransit;
 using Microsoft.Extensions.Hosting;
 
 namespace ShelfBuddy.InventoryManagement.Application;

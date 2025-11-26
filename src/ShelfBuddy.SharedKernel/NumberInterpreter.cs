@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Globalization;
 using System.Text;
 
@@ -12,7 +12,7 @@ public static class NumberInterpreter
     /// <summary>
     /// Cultures that commonly use ',' as the double separator.
     /// </summary>
-    private static readonly CultureInfo[] CulturesWithCommaDoubleSeparator =
+    private static readonly CultureInfo[] _culturesWithCommaDoubleSeparator =
     [
         new("fr-FR"),
         new("de-DE"),
@@ -24,7 +24,7 @@ public static class NumberInterpreter
     /// <summary>
     /// A set of common currency symbols.
     /// </summary>
-    private static readonly SearchValues<char> CommonCurrencySymbols = SearchValues.Create([
+    private static readonly SearchValues<char> _commonCurrencySymbols = SearchValues.Create([
         '$', '€', '£', '¥', '₹', '₩', '₽', '₺', '₫', '฿', '₴', '₦', '₱', '₪', '₲', '₵', '₡', '₭', '₥', '₨', '₿', '¢'
     ]);
 
@@ -96,7 +96,7 @@ public static class NumberInterpreter
             return result;
         }
 
-        foreach (var culture in CulturesWithCommaDoubleSeparator)
+        foreach (var culture in _culturesWithCommaDoubleSeparator)
         {
             if (double.TryParse(str, styles, culture, out result))
             {
@@ -130,7 +130,7 @@ public static class NumberInterpreter
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator (no LINQ for performance reasons; also benchmarked with .net9)
         foreach (var c in input)
         {
-            if (!CommonCurrencySymbols.Contains(c))
+            if (!_commonCurrencySymbols.Contains(c))
             {
                 sb.Append(c);
             }
@@ -146,14 +146,20 @@ public static class NumberInterpreter
     /// <returns>The string with double separators swapped if applicable.</returns>
     private static string SwapDoubleSeparators(string input)
     {
-        if (input.Contains('.') && input.Contains(','))
+        if (input.Contains('.', StringComparison.Ordinal) && input.Contains(',', StringComparison.Ordinal))
+        {
             return input;
+        }
 
-        if (input.Contains('.'))
+        if (input.Contains('.', StringComparison.Ordinal))
+        {
             return input.Replace('.', ',');
+        }
 
-        if (input.Contains(','))
+        if (input.Contains(',', StringComparison.Ordinal))
+        {
             return input.Replace(',', '.');
+        }
 
         return input;
     }

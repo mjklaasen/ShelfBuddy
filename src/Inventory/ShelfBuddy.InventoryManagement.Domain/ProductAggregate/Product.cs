@@ -1,4 +1,4 @@
-﻿using ShelfBuddy.SharedKernel;
+using ShelfBuddy.SharedKernel;
 
 namespace ShelfBuddy.InventoryManagement.Domain;
 
@@ -19,6 +19,7 @@ public class Product : AggregateRoot
     private Product(string name)
     {
         Name = name;
+        ProductCategory = new ProductCategory("Uncategorized");
     }
 
     public void UpdateProductCategory(ProductCategory productCategory)

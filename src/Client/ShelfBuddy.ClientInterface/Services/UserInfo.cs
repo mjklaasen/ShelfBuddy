@@ -1,6 +1,6 @@
 namespace ShelfBuddy.ClientInterface.Services;
 
-internal class UserInfo
+internal sealed class UserInfo
 {
     public Guid Id { get; set; }
     public string Username { get; set; } = string.Empty;

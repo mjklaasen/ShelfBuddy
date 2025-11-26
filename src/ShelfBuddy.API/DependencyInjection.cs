@@ -1,11 +1,11 @@
-﻿using MassTransit;
+using MassTransit;
 using ShelfBuddy.InventoryManagement.Application;
 using ShelfBuddy.InventoryManagement.Infrastructure;
 using ShelfBuddy.SharedKernel.Json;
 
 namespace ShelfBuddy.API;
 
-public static class DependencyInjection
+internal static class DependencyInjection
 {
     public static void AddShelfBuddyServices(this IHostApplicationBuilder builder)
     {

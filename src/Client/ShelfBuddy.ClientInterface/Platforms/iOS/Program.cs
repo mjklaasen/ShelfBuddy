@@ -3,7 +3,7 @@ using UIKit;
 
 namespace ShelfBuddy.ClientInterface
 {
-    internal class Program
+    internal sealed class Program
     {
         // This is the main entry point of the application.
         private static void Main(string[] args)
